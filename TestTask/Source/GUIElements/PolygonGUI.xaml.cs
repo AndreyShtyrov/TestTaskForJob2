@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 using TestTask.Source.Components;
 
 namespace TestTask.Source.GUIElements
@@ -31,13 +32,8 @@ namespace TestTask.Source.GUIElements
 
         void OnKeyPressedHandler(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                if (sender is TextBox tsender)
-                {
-                    tsender.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
-                }
-            }
+            if (e.Key == Key.Enter && sender is TextBox tsender)
+                tsender.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
         }
 
         private void RadioButton_Click(object sender, RoutedEventArgs e)
@@ -48,18 +44,11 @@ namespace TestTask.Source.GUIElements
             if (selectedItems.Count > 0 && !selectedItems[0].IsChecked)
                 selectedItems.RemoveAt(0);
             if (selectedItems.Count >= 2)
-            {
                 checkBox.IsChecked = false;
-            }
-            var polygons = new List<PolygonData>();
-            foreach(var pol in PolTree.Items)
-            {
-                if (pol is PolygonData tpol)
-                {
-                    if (tpol.IsChecked)
-                        polygons.Add(tpol);
-                }
-            }
+            var polygons = PolTree.Items
+                .OfType<PolygonData>()
+                .Where(polygon => polygon.IsChecked)
+                .ToList();
             selectedItems = polygons;
         }
     }

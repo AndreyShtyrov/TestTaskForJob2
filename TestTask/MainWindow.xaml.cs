@@ -23,50 +23,30 @@ namespace TestTask
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Polyline rectangle3;
+        private Polyline rectangle3 = null;
         
-        private List<Ellipse> ellipses = new();
+        private readonly List<Ellipse> ellipses = new();
         public MainWindow()
         {
             InitializeComponent();
-            rectangle3 = new Polyline();
-            Field.Children.Add(rectangle3);
             PolygonTreeView.DataContext = Controller.instance.PolygonDatas;
             MouseDown += OnMouseDown;
         }
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton is MouseButtonState.Pressed)
-            {
-                var pos = e.GetPosition(Field);
-                if (pos.X < 0 || pos.Y < 0)
-                    return;
-                if (pos.X > Field.ActualWidth || pos.Y > Field.ActualHeight)
-                    return;
-                var selected = PolygonTreeView.PolTree.SelectedItem;
-                if (selected == null)
-                    return;
-                if (selected is PolygonData tselected)
-                {
-                    if (tselected.CheckNewBoundCrossPrevBorders((int)pos.X, (int)pos.Y))
-                        return;
-                    tselected.AddNode((int)pos.X, (int)pos.Y);
-                }
-                    
-            }
+            if (e.LeftButton is not MouseButtonState.Pressed)
+                return;
+            var pos = e.GetPosition(Field);
+            if (pos.X < 0 || pos.Y < 0 || pos.X > Field.ActualWidth || pos.Y > Field.ActualHeight)
+                return;
+            var selected = PolygonTreeView.PolTree.SelectedItem;
+            if (selected is PolygonData tselected && !tselected.CheckNewBoundCrossPrevBorders((int)pos.X, (int)pos.Y))
+                tselected.AddNode((int)pos.X, (int)pos.Y);
         }
 
         private void CrosPoints_Click(object sender, RoutedEventArgs e)
         {
-            var blueBrush = new SolidColorBrush
-            {
-                Color = Colors.Blue
-            };
-            var yBrush = new SolidColorBrush
-            {
-                Color = Colors.Yellow
-            };
             if (PolygonTreeView.selectedItems.Count != 2)
             {
                 MessageBox.Show("You should choose two polygons");
@@ -78,7 +58,7 @@ namespace TestTask
             {
                 var ellipse = new Ellipse
                 {
-                    Stroke = blueBrush,
+                    Stroke = new SolidColorBrush(Colors.Blue),
                     Width = 4,
                     Height = 4
                 };
@@ -89,19 +69,14 @@ namespace TestTask
             }
             foreach (var bound in pointsLines.Item2)
             {
-                var p1 = new Point(bound.Left.X, bound.Left.Y);
-                var p2 = new Point(bound.Right.X, bound.Right.Y);
-                var line = new Line
+                Field.Children.Add(new Line
                 {
                     X1 = bound.Left.X,
                     X2 = bound.Right.X,
                     Y1 = bound.Left.Y,
                     Y2 = bound.Right.Y,
-                    Stroke = yBrush
-                };
-                Field.Children.Add(line);
-
-
+                    Stroke = new SolidColorBrush(Colors.Yellow)
+                });
             }
             for (var i = 0; i < pointsLines.Item2.Count; i++)
             {
@@ -116,16 +91,6 @@ namespace TestTask
 
         private void CreatCrosPol_Click(object sender, RoutedEventArgs e)
         {
-            var pinkBrush = new SolidColorBrush
-            {
-                Color = Colors.Pink
-            };
-            Field.Children.Remove(rectangle3);
-            rectangle3 = new Polyline
-            {
-                Stroke = pinkBrush,
-                StrokeThickness = 3
-            };
             if (PolygonTreeView.selectedItems.Count != 2)
             {
                 MessageBox.Show("You Should choose two polgydon");
@@ -141,27 +106,22 @@ namespace TestTask
                 return;
             var points = new PointCollection();
             foreach (var node in newPol.Nodes)
-            {
                 points.Add(new Point(node.X, node.Y));
-            }
             
             points.Add(new Point(newPol.Nodes[0].X, newPol.Nodes[0].Y));
-            rectangle3.Points = points;
+            if (rectangle3 != null)
+                Field.Children.Remove(rectangle3);
+            rectangle3 = new Polyline
+            {
+                Stroke = new SolidColorBrush(Colors.Pink),
+                StrokeThickness = 3,
+                Points = points
+            };
             Field.Children.Add(rectangle3);
         }
 
         private void CreateUnitPol_Click(object sender, RoutedEventArgs e)
         {
-            var pinkBrush = new SolidColorBrush
-            {
-                Color = Colors.Pink
-            };
-            Field.Children.Remove(rectangle3);
-            rectangle3 = new Polyline
-            {
-                Stroke = pinkBrush,
-                StrokeThickness = 3
-            };
             if (PolygonTreeView.selectedItems.Count != 2)
             {
                 MessageBox.Show("You Should choose two polgydon");
@@ -177,20 +137,24 @@ namespace TestTask
                 return;
             var points = new PointCollection();
             foreach (var node in newPol.Nodes)
-            {
                 points.Add(new Point(node.X, node.Y));
-            }
+
             points.Add(new Point(newPol.Nodes[0].X, newPol.Nodes[0].Y));
-            rectangle3.Points = points;
+            if (rectangle3 != null)
+                Field.Children.Remove(rectangle3);
+            rectangle3 = new Polyline
+            {
+                Stroke = new SolidColorBrush(Colors.Pink),
+                StrokeThickness = 3,
+                Points = points
+            };
             Field.Children.Add(rectangle3);
         }
 
         private void CalculateS1_Click(object sender, RoutedEventArgs e)
         {
             var firstPolygon = Controller.instance.PolygonDatas[0];
-            if (firstPolygon is null)
-                return;
-            if (!firstPolygon.IsClosed)
+            if (firstPolygon is null || !firstPolygon.IsClosed)
                 return;
             var s = firstPolygon.CalculateS();
             SqLabel.Content = s.ToString();
@@ -208,8 +172,7 @@ namespace TestTask
         {
             Field.Children.Clear();
             Controller.instance.PolygonDatas.Clear();
-            rectangle3 = new Polyline();
-            Field.Children.Add(rectangle3);
+            rectangle3 = null;
             PolygonTreeView.DataContext = Controller.instance.PolygonDatas;
             PolygonTreeView.selectedItems.Clear();
         }
@@ -221,8 +184,9 @@ namespace TestTask
                 Field.Children.Remove(ellipse);
             }
             ellipses.Clear();
-            Field.Children.Remove(rectangle3);
-            rectangle3 = new Polyline();
+            if (rectangle3 != null)
+                Field.Children.Remove(rectangle3);
+            rectangle3 = null;
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
