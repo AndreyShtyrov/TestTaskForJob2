@@ -19,27 +19,27 @@ namespace TestTask.Source
         public PolygonData SecondRectangle;
 
         public ObservableCollection<PolygonData> PolygonDatas { get; }
-        public int ChoosenRectangle
-        { get { return choosenRectangle; } }
-
-        private int choosenRectangle = 0;
+        public int ChoosenRectangle { get; } = 0;
 
         private static Controller _instance;
+        private static readonly object _instanceLock = new object();
 
-        public static Controller instance
+        public static Controller Instance
         {
             get
             {
-                if (_instance is null)
-                {
-                    _instance = new Controller();
+                if (_instance is not null)
                     return _instance;
+                lock (_instanceLock)
+                {
+                    if (_instance is null)
+                        _instance = new Controller();
                 }
                 return _instance;
             }
         }
 
-        public SolidColorBrush GenerateBush(int index)
+        public static SolidColorBrush GenerateBush(int index)
         {
             var brush = new SolidColorBrush();
             switch (index)
@@ -64,64 +64,26 @@ namespace TestTask.Source
             PolygonDatas = new ObservableCollection<PolygonData>();
         }
 
-        private bool check(List<INode> list, INode _node)
-        {
-            foreach (var node in list)
-            {
-                if (node.Equals(_node))
-                    return true;
-            }
-            return false;
-        }
-
-        private INode getEqualNode(List<INode> list, INode _node)
-        {
-            foreach (var node in list)
-            {
-                if (node.Equals(_node))
-                    return node;
-            }
-            return null;
-        }
-
         public PolygonData CreateCrossPolygon(List<PolygonData> polygons)
         {
-            if (PolygonDatas.Count >= 2)
-            {
-                FirstRectangle = polygons[0].Copy();
-                SecondRectangle = polygons[1].Copy();
-            }
-            else
-            {
+            if (PolygonDatas.Count < 2)
                 return new PolygonData();
-            }
+            FirstRectangle = polygons[0].Copy();
+            SecondRectangle = polygons[1].Copy();
+
             var unitedPoints = new List<INode>();
-            foreach (var node in FirstRectangle.nodes)
-            {
-                var res = SecondRectangle.CheckPointOutOfPolygon(node);
+            unitedPoints.AddRange(FirstRectangle.Nodes.Where(node => !SecondRectangle.CheckPointOutOfPolygon(node)));
+            unitedPoints.AddRange(SecondRectangle.Nodes.Where(node => !FirstRectangle.CheckPointOutOfPolygon(node)));
 
-                if (!res)
-                    unitedPoints.Add(node);
-
-            }
-            foreach (var node in SecondRectangle.nodes)
-            {
-                var res = FirstRectangle.CheckPointOutOfPolygon(node);
-                if (!res)
-                    unitedPoints.Add(node);
-            }
             var crossPoints = FirstRectangle.AddCrossPoints(SecondRectangle);
             if (unitedPoints.Count == 0)
-            {
                 return new PolygonData();
-            }
             unitedPoints.AddRange(crossPoints);
+
             var prevPoints = SortNodeByConnections(unitedPoints);
             var result = new PolygonData(GenerateBush(2));
-            for (int i = 0; i < prevPoints.Count; i++)
-            {
-                result.AddNode(prevPoints[i].X, prevPoints[i].Y);
-            }
+            foreach (var point in prevPoints)
+                result.AddNode(point.X, point.Y);
             FirstRectangle = null;
             SecondRectangle = null;
             return result;
@@ -129,44 +91,32 @@ namespace TestTask.Source
 
         private List<INode> SortNodeByConnections(List<INode> unitedPoints)
         {
-            var prevPoints = new List<INode>();
-            INode prevPoint = null;
-            if (check(FirstRectangle.nodes.ToList<INode>(), unitedPoints[0]))
-                prevPoint = getEqualNode(FirstRectangle.nodes.ToList<INode>(), unitedPoints[0]);
-            else
-                prevPoint = getEqualNode(SecondRectangle.nodes.ToList<INode>(), unitedPoints[0]);
-            prevPoints.Add(prevPoint);
-            int j = 1;
+            var prevPoint = FirstRectangle.Nodes.FirstOrDefault(unitedPoints[0])
+                ?? SecondRectangle.Nodes.FirstOrDefault(unitedPoints[0]);
+            var prevPoints = new List<INode> { prevPoint };
+            var j = 1;
             while (j < unitedPoints.Count)
             {
-                bool isFound = false;
-                foreach (var node in unitedPoints)
+                var isFound = false;
+                foreach (var node in unitedPoints.Where(node => !prevPoints.Contains(node)))
                 {
-                    if (check(prevPoints, node))
-                        continue;
-                    var _point = getEqualNode(FirstRectangle.nodes.ToList<INode>(), node);
-                    if (_point != null)
+                    var _point = FirstRectangle.Nodes.FirstOrDefault(node);
+                    if (_point != null && (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint)))
                     {
-                        if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))
-                        {
-                            prevPoint = _point;
-                            prevPoints.Add(prevPoint);
-                            j += 1;
-                            isFound = true;
-                            break;
-                        }
+                        prevPoint = _point;
+                        prevPoints.Add(prevPoint);
+                        j += 1;
+                        isFound = true;
+                        break;
                     }
-                    _point = getEqualNode(SecondRectangle.nodes.ToList<INode>(), node);
-                    if (_point != null)
+                    _point = SecondRectangle.Nodes.FirstOrDefault(node);
+                    if (_point != null && (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint)))
                     {
-                        if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))
-                        {
-                            prevPoint = _point;
-                            j += 1;
-                            prevPoints.Add(prevPoint);
-                            isFound = true;
-                            break;
-                        }
+                        prevPoint = _point;
+                        j += 1;
+                        prevPoints.Add(prevPoint);
+                        isFound = true;
+                        break;
                     }
                 }
                 if (!isFound)
@@ -177,98 +127,57 @@ namespace TestTask.Source
 
         public PolygonData CreateUnitPolygon(List<PolygonData> polygons)
         {
-            if (PolygonDatas.Count >= 2)
-            {
-                FirstRectangle = polygons[0].Copy();
-                SecondRectangle = polygons[1].Copy();
-            }
-            else
-            {
+            if (PolygonDatas.Count < 2)
                 return new PolygonData();
-            }
+
+            FirstRectangle = polygons[0].Copy();
+            SecondRectangle = polygons[1].Copy();
             var unitedPoints = new List<INode>();
-            foreach (var node in FirstRectangle.nodes)
-            {
-                var res = SecondRectangle.CheckPointOutOfPolygon(node);
+            unitedPoints.AddRange(FirstRectangle.Nodes.Where(node => SecondRectangle.CheckPointOutOfPolygon(node)));
+            unitedPoints.AddRange(SecondRectangle.Nodes.Where(node => FirstRectangle.CheckPointOutOfPolygon(node)));
 
-                if (res)
-                    unitedPoints.Add(node);
-
-            }
-            foreach (var node in SecondRectangle.nodes)
-            {
-                var res = FirstRectangle.CheckPointOutOfPolygon(node);
-                if (res)
-                    unitedPoints.Add(node);
-            }
             var crossPoints = FirstRectangle.AddCrossPoints(SecondRectangle);
             if (crossPoints.Count == 0)
-            {
                 return new PolygonData(GenerateBush(2));
-            }
             unitedPoints.AddRange(crossPoints);
+
             var prevPoints = SortNodeByConnections(unitedPoints);
             var result = new PolygonData(GenerateBush(2));
-            for (int i = 0; i < prevPoints.Count; i++)
-            {
+            for (var i = 0; i < prevPoints.Count; i++)
                 result.AddNode(prevPoints[i].X, prevPoints[i].Y);
-            }
             FirstRectangle = null;
             SecondRectangle = null;
             return result;
         }
 
-        public Tuple<List<Point>, List<IBound>, List<int>> CalculateCrossPoints(List<PolygonData> polygons)
+        public (List<Point> result, List<IBound> supportLines, List<int> crossintCounts) CalculateCrossPoints(List<PolygonData> polygons)
         {
             if (PolygonDatas.Count >= 2)
             {
                 FirstRectangle = polygons[0].Copy();
                 SecondRectangle = polygons[1].Copy();
             }
-            List<IBound> supportLines = new List<IBound>();
-            List<int> crossintCounts = new List<int>();
-            if (FirstRectangle is null || SecondRectangle is null)
-                return new Tuple<List<Point>, List<IBound>, List<int>>
-                    (new List<Point>(), new List<IBound>(), new List<int>());
-            if (!(FirstRectangle.IsClosed && SecondRectangle.IsClosed))
-                return new Tuple<List<Point>, List<IBound>, List<int>>
-                    (new List<Point>(), new List<IBound>(), new List<int>());
-            List<Point> result = new List<Point>();
-            var _result = FirstRectangle.CalculateCrossPoints(SecondRectangle);
-            foreach (var node in _result.Item1)
-            {
-                result.Add(node.Point);
-            }
 
-            foreach (var node in FirstRectangle.nodes)
-            {
-                var res = SecondRectangle.CheckPointOutOfPolygon(node);
+            if (FirstRectangle is null || SecondRectangle is null ||
+                !(FirstRectangle.IsClosed && SecondRectangle.IsClosed))
+                return (new List<Point>(), new List<IBound>(), new List<int>());
 
-                if (!res)
-                {
-                    result.Add(new Point(node.X, node.Y));
-                }
-            }
-            foreach (var node in SecondRectangle.nodes)
-            {
-                var res = FirstRectangle.CheckPointOutOfPolygon(node);
-                if (!res)
-                {
-                    result.Add(new Point(node.X, node.Y));
-                }
-            }
+            var supportLines = new List<IBound>();
+            var crossintCounts = new List<int>();
+            var result = new List<Point>();
+            result.AddRange(FirstRectangle.CalculateCrossPoints(SecondRectangle).Item1.Select(node => node.Point));
+            result.AddRange(FirstRectangle.Nodes.Where(node => !SecondRectangle.CheckPointOutOfPolygon(node)).Select(node => new Point(node.X, node.Y)));
+            result.AddRange(SecondRectangle.Nodes.Where(node => !FirstRectangle.CheckPointOutOfPolygon(node)).Select(node => new Point(node.X, node.Y)));
             FirstRectangle = null;
             SecondRectangle = null;
-            return new Tuple<List<Point>, List<IBound>, List<int>>(result, supportLines, crossintCounts);
+            return (result, supportLines, crossintCounts);
 
         }
 
         public void Update()
         {
             foreach (var polygon in PolygonDatas)
-            {
                 polygon.Update();
-            }
         }
     }
 }

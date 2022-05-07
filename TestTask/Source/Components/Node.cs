@@ -12,24 +12,18 @@ namespace TestTask.Source.Components
     {
         private int _x;
         private int _y;
-        public int X { 
-            get
+        public int X
+        {
+            get => _x;
+            set
             {
-                return _x;
-            }
-            set {
                 _x = value;
-                if (OnChangeNode != null)
-                { 
-                    OnChangeNode(this, new EventArgs());
-                }
-            } }
+                OnChangeNode?.Invoke(this, new EventArgs());
+            }
+        }
         public int Y
         {
-            get
-            {
-                return _y;
-            }
+            get => _y;
             set
             {
                 _y = value;
@@ -41,86 +35,49 @@ namespace TestTask.Source.Components
         }
         public OnChangeNode OnChangeNode = null;
 
-        public event OnChangeNode testEvent;
-
-        public Point Point
-        {
-            get { return new Point(X, Y); }
-        }
-        public IBound right { get; set; }
-        public IBound left { get; set; }
+        public Point Point => new(X, Y);
+        public IBound Right { get; set; }
+        public IBound Left { get; set; }
         public Node(int X, int Y)
         {
             this.X = X;
             this.Y = Y;
         }
 
-        public INode Next()
+        public INode Prev() => Left.Left;
+        public INode Next() => Right.Right;
+
+        public (double x, double y) Direction(INode other)
         {
-            return right.right;
+            var lngth = Math.Sqrt(VectorLengthSquare(other));
+            var x = (X - other.X) / lngth;
+            var y = (Y - other.Y) / lngth;
+            return (x, y);
         }
 
-        public Tuple<double, double> Direction(INode other)
-        {
-            var lngth = Math.Sqrt((X - other.X) * (X - other.X) + (Y - other.Y) * (Y - other.Y));
-            var x = (double)(X - other.X) / lngth;
-            var y = (double)(Y - other.Y) / lngth;
-            return new Tuple<double, double>(x, y);
-        }
+        public int VectorLengthSquare(INode other) => (X - other.X) * (X - other.X) + (Y - other.Y) * (Y - other.Y);
 
-        public int SquarVectorLength(INode other)
-        {
-            return (X - other.X) * (X - other.X) + (Y - other.Y) * (Y - other.Y);
-        }
+        public bool Equals(INode other) => other != null && other.X == X && other.Y == Y;
+        public override bool Equals(object other) => other is INode otherNode && Equals(otherNode);
 
-        public INode Prev()
-        {
-            return left.left;
-        }
-
-        public bool Equals(INode other)
-        {
-            if (other.X == X && other.Y == Y)
-                return true;
-            return false;
-        }
-
-        public List<INode> NodeSeuqents()
+        public List<INode> NodeSequence()
         {
             var startNode = this;
-            List<INode> nodes = new List<INode>() { startNode };
+            var nodes = new List<INode>() { startNode };
             var nextNode = Next();
-            if (nextNode.Next() is null)
+            if (nextNode.Next() is null || startNode.Equals(nextNode))
                 return nodes;
-            if (startNode.Equals(nextNode))
-                return nodes;
-            nodes.Add(Next());
-            while (true)
+            nodes.Add(nextNode);
+            nextNode = nextNode.Next();
+            while (nextNode != null && !startNode.Equals(nextNode))
             {
+                nodes.Add(nextNode);
                 nextNode = nextNode.Next();
-                if (nextNode == null)
-                    break;
-                if (startNode.Equals(nextNode))
-                    break;
-                nodes.Add(nextNode);    
             }
             return nodes;
         }
 
-        public static bool operator ==(Node lhs, Node rhs)
-        {
-            if (lhs is null)
-            {
-                if (rhs is null)
-                {
-                    return true;
-                }
-                return false;
-            }
-
-            return lhs.Equals(rhs);
-        }
-
+        public static bool operator ==(Node lhs, Node rhs) => lhs is null && rhs is null || lhs.Equals(rhs);
         public static bool operator !=(Node lhs, Node rhs) => !(lhs == rhs);
     }
 
