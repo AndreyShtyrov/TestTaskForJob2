@@ -47,8 +47,8 @@ namespace TestTask.Source.Components
         {
             get { return new Point(X, Y); }
         }
-        public IBound right { get; set; }
-        public IBound left { get; set; }
+        public IBound Right { get; set; }
+        public IBound Left { get; set; }
         public Node(int X, int Y)
         {
             this.X = X;
@@ -57,7 +57,7 @@ namespace TestTask.Source.Components
 
         public INode Next()
         {
-            return right.right;
+            return Right.right;
         }
 
         public Tuple<double, double> Direction(INode other)
@@ -68,14 +68,14 @@ namespace TestTask.Source.Components
             return new Tuple<double, double>(x, y);
         }
 
-        public int SquarVectorLength(INode other)
+        public int VectorLengthSquare(INode other)
         {
             return (X - other.X) * (X - other.X) + (Y - other.Y) * (Y - other.Y);
         }
 
         public INode Prev()
         {
-            return left.left;
+            return Left.left;
         }
 
         public bool Equals(INode other)
@@ -85,7 +85,7 @@ namespace TestTask.Source.Components
             return false;
         }
 
-        public List<INode> NodeSeuqents()
+        public List<INode> NodeSequentce()
         {
             var startNode = this;
             List<INode> nodes = new List<INode>() { startNode };

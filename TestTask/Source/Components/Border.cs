@@ -173,8 +173,8 @@ namespace TestTask.Source.Components
 
         public Border(INode left, INode right): base(left, right)
         {
-            left.right = this;
-            right.left = this;
+            left.Right = this;
+            right.Left = this;
         }
 
     }

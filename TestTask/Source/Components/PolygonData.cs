@@ -82,7 +82,7 @@ namespace TestTask.Source.Components
             _bounds = new List<IBound>();
             foreach (var node in nodes)
             {
-                _bounds.Add(node.right);
+                _bounds.Add(node.Right);
             }
         }
 
@@ -107,7 +107,7 @@ namespace TestTask.Source.Components
             _b = new Border(newNode, bounds[includedBorder].right);
             newNode.OnChangeNode = OnChangeNodeCollection;
             var startNode = nodes[0];
-            var _nodes = startNode.NodeSeuqents();
+            var _nodes = startNode.NodeSequentce();
             nodes.Clear();
             foreach (var node in _nodes)
             {
@@ -117,7 +117,7 @@ namespace TestTask.Source.Components
             _bounds = new List<IBound>();
             foreach (var node in nodes)
             {
-                _bounds.Add(node.right);
+                _bounds.Add(node.Right);
             }
         }
 
@@ -134,7 +134,7 @@ namespace TestTask.Source.Components
                         atSameBound.Add(newNodes[i]);
                 }
                 var left = atSameBound[0].Prev();
-                atSameBound = atSameBound.OrderBy(x => left.SquarVectorLength(x)).ToList<INode>();
+                atSameBound = atSameBound.OrderBy(x => left.VectorLengthSquare(x)).ToList<INode>();
                 var right = atSameBound[0].Next();
                 foreach (var node in atSameBound)
                 {
@@ -305,12 +305,12 @@ namespace TestTask.Source.Components
                     if (point != null)
                     {
                         var node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.left = new Segment(bound1.left, node);
-                        node.right = new Segment(node, bound1.right);
+                        node.Left = new Segment(bound1.left, node);
+                        node.Right = new Segment(node, bound1.right);
                         newNodes1.Add(node);
                         node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.left = new Segment(bound2.left, node);
-                        node.right = new Segment(node, bound2.right);
+                        node.Left = new Segment(bound2.left, node);
+                        node.Right = new Segment(node, bound2.right);
                         newNodes2.Add(node);
                     }
                 }
@@ -332,12 +332,12 @@ namespace TestTask.Source.Components
                     {
                         var node = new Node((int)point.Value.X, (int)point.Value.Y);
                         result.Add(node);
-                        node.left = new Segment(bound1.left, node);
-                        node.right = new Segment(node, bound1.right);
+                        node.Left = new Segment(bound1.left, node);
+                        node.Right = new Segment(node, bound1.right);
                         newNodes1.Add(node);
                         node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.left = new Segment(bound2.left, node);
-                        node.right = new Segment(node, bound2.right);
+                        node.Left = new Segment(bound2.left, node);
+                        node.Right = new Segment(node, bound2.right);
                         newNodes2.Add(node);
                     }
                 }
@@ -363,8 +363,8 @@ namespace TestTask.Source.Components
 
         public double TriangleSquare(INode n1, INode n2, INode n3)
         {
-            var a = (double)n1.SquarVectorLength(n2);
-            var b = (double)n2.SquarVectorLength(n3);
+            var a = (double)n1.VectorLengthSquare(n2);
+            var b = (double)n2.VectorLengthSquare(n3);
             var v1 = n2.Direction(n1);
             var v2 = n2.Direction(n3);
             var angle = Math.Acos(v1.Item1 * v2.Item1 + v1.Item2 * v2.Item2);
@@ -423,7 +423,7 @@ namespace TestTask.Source.Components
                     firstNode = node;
             }
             mainPolygon = new PolygonData();
-            var nodelist = firstNode.NodeSeuqents();
+            var nodelist = firstNode.NodeSequentce();
             for (int i = 0; i < nodelist.Count; i++)
                 mainPolygon.AddNode(nodelist[i].X, nodelist[i].Y);
             mainPolygon.CloseFigure();

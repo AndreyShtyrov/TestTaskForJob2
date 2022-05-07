@@ -7,34 +7,25 @@ using System.Threading.Tasks;
 
 namespace TestTask.Source.Interface
 {
-    public interface INode
+    public interface INode : IEquatable<INode>
     {
-        public int X
-        { get; set; }
-        public int Y
-        { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
-        public IBound right
-        { get; set; }
+        public IBound Right { get; set; }
+        public IBound Left { get; set; }
 
-        public Point Point
-        { get; }
+        public Point Point { get; }
 
-        public IBound left
-        { get; set; }
-
+        public INode Prev();
         public INode Next();
 
-        public List<INode> NodeSeuqents();
-        
+        public List<INode> NodeSequentce();
+
 
         public Tuple<double, double> Direction(INode other);
 
-        public int SquarVectorLength(INode other);
-
-        public INode Prev();
-
-        public bool Equals(INode other);
+        public int VectorLengthSquare(INode other);
 
     }
 }
