@@ -194,6 +194,22 @@ namespace TestTask.Source.Components
             bounds.Add(newBound);
         }
 
+        public bool CheckNewBoundCrossPrevBorders(int X, int Y)
+        {
+            if (nodes.Count == 0 || bounds.Count == 0)
+                return false;
+            var prevNode = new Node(nodes[nodes.Count - 1].X, nodes[nodes.Count - 1].Y);
+            var nextNode = new Node(X, Y);
+            var ray = new Ray(prevNode, nextNode);
+            for(int i = 0; i < bounds.Count - 1; i++)
+            {
+                var crp = ray.CrossPoint(bounds[i]);
+                if (crp.HasValue)
+                    return true;
+            }
+            return false;
+        }
+
         public PolygonData Copy()
         {
             var pol = new PolygonData();

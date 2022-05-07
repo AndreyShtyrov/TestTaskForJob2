@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,7 +48,12 @@ namespace TestTask
                 if (selected == null)
                     return;
                 if (selected is PolygonData tselected)
+                {
+                    if (tselected.CheckNewBoundCrossPrevBorders((int)pos.X, (int)pos.Y))
+                        return;
                     tselected.AddNode((int)pos.X, (int)pos.Y);
+                }
+                    
             }
         }
 
