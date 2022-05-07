@@ -76,9 +76,10 @@ namespace TestTask.Source
             unitedPoints.AddRange(SecondRectangle.Nodes.Where(node => !FirstRectangle.CheckPointOutOfPolygon(node)));
 
             var crossPoints = FirstRectangle.AddCrossPoints(SecondRectangle);
+
+            unitedPoints.AddRange(crossPoints);
             if (unitedPoints.Count == 0)
                 return new PolygonData();
-            unitedPoints.AddRange(crossPoints);
 
             var prevPoints = SortNodeByConnections(unitedPoints);
             var result = new PolygonData(GenerateBush(2));
@@ -91,16 +92,16 @@ namespace TestTask.Source
 
         private List<INode> SortNodeByConnections(List<INode> unitedPoints)
         {
-            var prevPoint = FirstRectangle.Nodes.FirstOrDefault(unitedPoints[0])
-                ?? SecondRectangle.Nodes.FirstOrDefault(unitedPoints[0]);
+            var prevPoint = FirstRectangle.Nodes.FirstOrDefault((_node) => _node.Equals(unitedPoints[0]))
+                ?? SecondRectangle.Nodes.FirstOrDefault((_node) => _node.Equals(unitedPoints[0]));
             var prevPoints = new List<INode> { prevPoint };
             var j = 1;
             while (j < unitedPoints.Count)
             {
                 var isFound = false;
-                foreach (var node in unitedPoints.Where(node => !prevPoints.Contains(node)))
+                foreach (var node in unitedPoints.Where<INode>(node => !prevPoints.Contains(node)))
                 {
-                    var _point = FirstRectangle.Nodes.FirstOrDefault(node);
+                    var _point = FirstRectangle.Nodes.FirstOrDefault<INode>((_node) => _node.Equals(node));
                     if (_point != null && (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint)))
                     {
                         prevPoint = _point;
@@ -109,7 +110,7 @@ namespace TestTask.Source
                         isFound = true;
                         break;
                     }
-                    _point = SecondRectangle.Nodes.FirstOrDefault(node);
+                    _point = SecondRectangle.Nodes.FirstOrDefault((_node) => _node.Equals(node));
                     if (_point != null && (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint)))
                     {
                         prevPoint = _point;
