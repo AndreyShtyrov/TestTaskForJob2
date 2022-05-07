@@ -118,7 +118,7 @@ namespace TestTask.Source
             unitedPoints.AddRange(crossPoints);
             var prevPoints = SortNodeByConnections(unitedPoints);
             var result = new PolygonData(GenerateBush(2));
-            for (int i = 0; i < prevPoints.Count; i++)
+            for (var i = 0; i < prevPoints.Count; i++)
             {
                 result.AddNode(prevPoints[i].X, prevPoints[i].Y);
             }
@@ -136,10 +136,10 @@ namespace TestTask.Source
             else
                 prevPoint = getEqualNode(SecondRectangle.nodes.ToList(), unitedPoints[0]);
             prevPoints.Add(prevPoint);
-            int j = 1;
+            var j = 1;
             while (j < unitedPoints.Count)
             {
-                bool isFound = false;
+                var isFound = false;
                 foreach (var node in unitedPoints)
                 {
                     if (check(prevPoints, node))
@@ -209,7 +209,7 @@ namespace TestTask.Source
             unitedPoints.AddRange(crossPoints);
             var prevPoints = SortNodeByConnections(unitedPoints);
             var result = new PolygonData(GenerateBush(2));
-            for (int i = 0; i < prevPoints.Count; i++)
+            for (var i = 0; i < prevPoints.Count; i++)
             {
                 result.AddNode(prevPoints[i].X, prevPoints[i].Y);
             }
@@ -225,15 +225,15 @@ namespace TestTask.Source
                 FirstRectangle = polygons[0].Copy();
                 SecondRectangle = polygons[1].Copy();
             }
-            List<IBound> supportLines = new List<IBound>();
-            List<int> crossintCounts = new List<int>();
+            var supportLines = new List<IBound>();
+            var crossintCounts = new List<int>();
             if (FirstRectangle is null || SecondRectangle is null)
                 return new Tuple<List<Point>, List<IBound>, List<int>>
                     (new List<Point>(), new List<IBound>(), new List<int>());
             if (!(FirstRectangle.IsClosed && SecondRectangle.IsClosed))
                 return new Tuple<List<Point>, List<IBound>, List<int>>
                     (new List<Point>(), new List<IBound>(), new List<int>());
-            List<Point> result = new List<Point>();
+            var result = new List<Point>();
             var _result = FirstRectangle.CalculateCrossPoints(SecondRectangle);
             foreach (var node in _result.Item1)
             {

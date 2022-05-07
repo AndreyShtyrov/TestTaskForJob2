@@ -51,7 +51,7 @@ namespace TestTask.Source.GUIElements
             {
                 checkBox.IsChecked = false;
             }
-            List<PolygonData> polygons = new List<PolygonData>();
+            var polygons = new List<PolygonData>();
             foreach(var pol in PolTree.Items)
             {
                 if (pol is PolygonData tpol)

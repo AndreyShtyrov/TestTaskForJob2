@@ -59,9 +59,9 @@ namespace TestTask
 
         private void CrosPoints_Click(object sender, RoutedEventArgs e)
         {
-            SolidColorBrush blueBrush = new SolidColorBrush();
+            var blueBrush = new SolidColorBrush();
             blueBrush.Color = Colors.Blue;
-            SolidColorBrush yBrush = new SolidColorBrush();
+            var yBrush = new SolidColorBrush();
             yBrush.Color = Colors.Yellow;
             if (PolygonTreeView.selectedItems.Count != 2)
             {
@@ -72,7 +72,7 @@ namespace TestTask
             var points = pointsLines.Item1;
             foreach (var point in points)
             {
-                Ellipse ellipse = new Ellipse();
+                var ellipse = new Ellipse();
                 ellipse.Stroke = blueBrush;
                 ellipse.Width = 4;
                 ellipse.Height = 4;
@@ -85,7 +85,7 @@ namespace TestTask
             {
                 var p1 = new Point(bound.Left.X, bound.Left.Y);
                 var p2 = new Point(bound.Right.X, bound.Right.Y);
-                Line line = new Line();
+                var line = new Line();
                 line.X1 = bound.Left.X;
                 line.X2 = bound.Right.X;
                 line.Y1 = bound.Left.Y;
@@ -95,10 +95,10 @@ namespace TestTask
 
 
             }
-            for (int i = 0; i < pointsLines.Item2.Count; i++)
+            for (var i = 0; i < pointsLines.Item2.Count; i++)
             {
                 var bound = pointsLines.Item2[i];
-                Label label = new Label();
+                var label = new Label();
                 Canvas.SetLeft(label, bound.Left.X + 8);
                 Canvas.SetTop(label, bound.Left.Y);
                 label.Content = pointsLines.Item3[i].ToString();
@@ -108,7 +108,7 @@ namespace TestTask
 
         private void CreatCrosPol_Click(object sender, RoutedEventArgs e)
         {
-            SolidColorBrush pinkBrush = new SolidColorBrush();
+            var pinkBrush = new SolidColorBrush();
             pinkBrush.Color = Colors.Pink;
             Field.Children.Remove(rectangle3);
             rectangle3 = new Polyline();
@@ -127,7 +127,7 @@ namespace TestTask
             var newPol = Controller.instance.CreateCrossPolygon(PolygonTreeView.selectedItems);
             if (newPol.nodes.Count == 0)
                 return;
-            PointCollection points = new PointCollection();
+            var points = new PointCollection();
             foreach (var node in newPol.nodes)
             {
                 points.Add(new Point(node.X, node.Y));
@@ -140,7 +140,7 @@ namespace TestTask
 
         private void CreateUnitPol_Click(object sender, RoutedEventArgs e)
         {
-            SolidColorBrush pinkBrush = new SolidColorBrush();
+            var pinkBrush = new SolidColorBrush();
             pinkBrush.Color = Colors.Pink;
             Field.Children.Remove(rectangle3);
             rectangle3 = new Polyline();
@@ -159,7 +159,7 @@ namespace TestTask
             var newPol = Controller.instance.CreateUnitPolygon(PolygonTreeView.selectedItems);
             if (newPol.nodes.Count == 0)
                 return;
-            PointCollection points = new PointCollection();
+            var points = new PointCollection();
             foreach (var node in newPol.nodes)
             {
                 points.Add(new Point(node.X, node.Y));
@@ -183,7 +183,7 @@ namespace TestTask
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             var idx = Controller.instance.PolygonDatas.Count;
-            PolygonData polygonData = new PolygonData(Controller.instance.GenerateBush(idx));
+            var polygonData = new PolygonData(Controller.instance.GenerateBush(idx));
             Controller.instance.PolygonDatas.Add(polygonData);
             Field.Children.Add(polygonData.GUIView);
         }

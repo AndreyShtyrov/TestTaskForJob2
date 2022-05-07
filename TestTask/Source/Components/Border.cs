@@ -12,13 +12,13 @@ namespace TestTask.Source.Components
 {
     public class Segment : IBound
     {
-        public INode Left { get ; }
-        public INode Right { get ; }
+        public INode Left { get; }
+        public INode Right { get; }
 
         public Segment(INode left, INode right)
         {
-            this.Left = left;
-            this.Right = right;
+            Left = left;
+            Right = right;
         }
 
         public double CalculateAngle(INode other, bool isForward)
@@ -27,11 +27,11 @@ namespace TestTask.Source.Components
             {
                 var dir1 = Right.Direction(Left);
                 var dir2 = other.Direction(Right);
-                return Math.Acos(dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2);
+                return Math.Acos(dir1.x * dir2.x + dir1.y * dir2.y);
             }
             var dir_1 = Left.Direction(Right);
             var dir_2 = other.Direction(Left);
-            return Math.Acos(dir_1.Item1 * dir_2.Item1 + dir_1.Item2 * dir_2.Item2);
+            return Math.Acos(dir_1.x * dir_2.x + dir_1.y * dir_2.y);
         }
 
         public virtual Point? CrossPoint(IBound other, bool islimited = true)
@@ -54,7 +54,7 @@ namespace TestTask.Source.Components
             var t1 = other.Left.X - Left.X;
             var t2 = other.Left.Y - Left.Y;
             Matrix<double> A = DenseMatrix.OfArray(new double[,] { { c11, c12 }, { c21, c22 } });
-            Vector<double> B = Vector<double>.Build.Dense(new double[] { t1, t2 });
+            var B = Vector<double>.Build.Dense(new double[] { t1, t2 });
             var linearRoots = A.Solve(B);
             var a = (double)linearRoots[0];
             if (double.IsInfinity(a))
@@ -62,23 +62,16 @@ namespace TestTask.Source.Components
 
             var y = Math.Round(a * c21 + Left.Y);
             var x = Math.Round(a * c11 + Left.X);
-            if (islimited)
-            {
-                if (!InBorders((int)x, (int)y))
-                    return null;
-            }
-            if (!other.InBorders((int)x, (int)y))
-                return null;
-            return new Point((int)x, (int)y);
+
+            return islimited && !InBorders((int)x, (int)y) || !other.InBorders((int)x, (int)y)
+                ? null
+                : new Point((int)x, (int)y);
         }
 
         public virtual bool InBorders(int X, int Y)
         {
-            if (Math.Min(Left.X, Right.X) > X || X > Math.Max(Left.X, Right.X))
-                return false;
-            if (Math.Min(Left.Y, Right.Y) > Y || Y > Math.Max(Left.Y, Right.Y))
-                return false;
-            return true;
+            return Math.Min(Left.X, Right.X) <= X && X <= Math.Max(Left.X, Right.X)
+                && Math.Min(Left.Y, Right.Y) <= Y && Y <= Math.Max(Left.Y, Right.Y);
             //if ((left.X < right.X) && (left.X <= X || X < right.X))
             //    return true;
             //if ((left.X > right.X) && (right.X < X || X <= left.X))
@@ -92,53 +85,21 @@ namespace TestTask.Source.Components
 
         public bool Equals(IBound other)
         {
-            if (Left != null && Right != null)
-            {
-                if (other.Left != null && other.Right != null)
-                {
-                    if (other.Left.Equals(Left) && other.Right.Equals(Right))
-                        return true;
-                }
-                return false;
-            }
-            if (Left != null && other.Left != null)
-            {
-                if (other.Right != null)
-                    return false;
-                if (Left.Equals(other.Left))
-                    return true;
-                return false;
-            }
-            if (Right != null && other.Right != null)
-            {
-                if (other.Left != null)
-                    return false;
-                if (Right.Equals(other.Right))
-                    return true;
-                return false;
-            }
-            return false;
+            return Left != null && Right != null && other.Left != null && other.Right != null && other.Left.Equals(Left) && other.Right.Equals(Right)
+                || Left != null && other.Left != null && other.Right == null && Left.Equals(other.Left)
+                || Right != null && other.Right != null && other.Left == null && Right.Equals(other.Right);
         }
     }
 
     public class LineData : Segment
     {
-
-        public LineData(INode left, INode right): base(left, right)
-        { }
-
-
-        public override bool InBorders(int X, int Y)
-        {
-            return true;
-        }
+        public LineData(INode left, INode right) : base(left, right) { }
+        public override bool InBorders(int X, int Y) => true;
     }
 
-
-    public class Ray: Segment
+    public class Ray : Segment
     {
-        public Ray(INode left, INode right) : base(left, right)
-        { }
+        public Ray(INode left, INode right) : base(left, right) { }
 
         public override Point? CrossPoint(IBound other, bool islimited = true)
         {
@@ -148,34 +109,25 @@ namespace TestTask.Source.Components
                 return null;
             var dir1 = Left.Direction(Right);
             var dir2 = Left.Direction(new Node((int)node.Value.X, (int)node.Value.Y));
-            var scalar = dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2;
-            if (scalar > 0)
-                return node;
-            else
-                return null;
+            var scalar = dir1.x * dir2.x + dir1.y * dir2.y;
+            return scalar > 0 ? node : null;
         }
 
         public override bool InBorders(int X, int Y)
         {
             var dir1 = Left.Direction(Right);
             var dir2 = Left.Direction(new Node(X, Y));
-            var scalar = dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2;
-            if (scalar > 0)
-                return true;
-            else
-                return false;
+            var scalar = dir1.x * dir2.x + dir1.y * dir2.y;
+            return scalar > 0;
         }
     }
 
-
-    public class Border:Segment
+    public class Border : Segment
     {
-
-        public Border(INode left, INode right): base(left, right)
+        public Border(INode left, INode right) : base(left, right)
         {
             left.Right = this;
             right.Left = this;
         }
-
     }
 }

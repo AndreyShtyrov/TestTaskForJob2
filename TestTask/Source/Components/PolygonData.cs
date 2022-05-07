@@ -42,10 +42,7 @@ namespace TestTask.Source.Components
         {
             get
             {
-                if (IsClosed)
-                    return "Close";
-                else
-                    return "Open";
+                return IsClosed ? "Close" : "Open";
             }
         }
 
@@ -61,10 +58,10 @@ namespace TestTask.Source.Components
 
         public void DeleteNode(INode toDelete)
         {
-            int toDeleteIdx = -1;
+            var toDeleteIdx = -1;
 
 
-            for (int i = 0; i < nodes.Count; i++)
+            for (var i = 0; i < nodes.Count; i++)
             {
                 if (nodes[i].Equals(toDelete))
                 {
@@ -76,7 +73,7 @@ namespace TestTask.Source.Components
 
             if (toDeleteIdx < 0)
                 return;
-            Border newBorder = new Border(nodes[toDeleteIdx].Prev(), nodes[toDeleteIdx].Next());
+            var newBorder = new Border(nodes[toDeleteIdx].Prev(), nodes[toDeleteIdx].Next());
             nodes.RemoveAt(toDeleteIdx);
 
             _bounds = new List<IBound>();
@@ -88,8 +85,8 @@ namespace TestTask.Source.Components
 
         public void IncludeNode(INode first, INode second, INode toInclude)
         {
-            int includedBorder = -1;
-            for (int i = 0; i < bounds.Count; i++)
+            var includedBorder = -1;
+            for (var i = 0; i < bounds.Count; i++)
             {
                 if (bounds[i].Left.Equals(first) && bounds[i].Right.Equals(second))
                 {
@@ -102,7 +99,7 @@ namespace TestTask.Source.Components
                     break;
                 }
             }
-            Node newNode = new Node(toInclude.X, toInclude.Y);
+            var newNode = new Node(toInclude.X, toInclude.Y);
             var _b = new Border(bounds[includedBorder].Left, newNode);
             _b = new Border(newNode, bounds[includedBorder].Right);
             newNode.OnChangeNode = OnChangeNodeCollection;
@@ -125,9 +122,9 @@ namespace TestTask.Source.Components
         {
             while (newNodes.Count > 0)
             {
-                List<INode> atSameBound = new List<INode>();
+                var atSameBound = new List<INode>();
                 atSameBound.Add(newNodes[0]);
-                for (int i = 1; i < newNodes.Count; i++)
+                for (var i = 1; i < newNodes.Count; i++)
                 {
                     if (atSameBound[0].Prev().Equals(newNodes[i].Prev())
                         && atSameBound[0].Next().Equals(newNodes[i].Next()))
@@ -181,7 +178,7 @@ namespace TestTask.Source.Components
                     return;
                 }
             }
-            Node newNode = new Node(X, Y);
+            var newNode = new Node(X, Y);
             newNode.OnChangeNode = OnChangeNodeCollection;
             if (nodes.Count == 0)
             {
@@ -189,7 +186,7 @@ namespace TestTask.Source.Components
                 return;
             }
             var prevNode = nodes[nodes.Count - 1];
-            Border newBound = new Border(prevNode, newNode);
+            var newBound = new Border(prevNode, newNode);
             nodes.Add(newNode);
             bounds.Add(newBound);
         }
@@ -201,7 +198,7 @@ namespace TestTask.Source.Components
             var prevNode = new Node(nodes[nodes.Count - 1].X, nodes[nodes.Count - 1].Y);
             var nextNode = new Node(X, Y);
             var ray = new Ray(prevNode, nextNode);
-            for(int i = 0; i < bounds.Count - 1; i++)
+            for(var i = 0; i < bounds.Count - 1; i++)
             {
                 var crp = ray.CrossPoint(bounds[i]);
                 if (crp.HasValue)
@@ -229,7 +226,7 @@ namespace TestTask.Source.Components
             if (nodes.Count < 3)
                 return;
             _IsClosed = true;
-            Border newBound = new Border(nodes[nodes.Count - 1], nodes[0]);
+            var newBound = new Border(nodes[nodes.Count - 1], nodes[0]);
             bounds.Add(newBound);
             OnChangeNodeCollection(new object(), new EventArgs());
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("State"));
@@ -237,12 +234,12 @@ namespace TestTask.Source.Components
 
         public bool CheckPointOutOfPolygon(INode node)
         {
-            int minleft = nodes[0].X;
-            int maxright = nodes[0].X;
-            int maxtop = nodes[0].Y;
-            int minbotton = nodes[0].Y;
+            var minleft = nodes[0].X;
+            var maxright = nodes[0].X;
+            var maxtop = nodes[0].Y;
+            var minbotton = nodes[0].Y;
 
-            for (int i = 1; i < nodes.Count; i++)
+            for (var i = 1; i < nodes.Count; i++)
             {
                 if (nodes[i].X < minleft)
                     minleft = nodes[i].X;
@@ -257,7 +254,7 @@ namespace TestTask.Source.Components
                 return true;
             if (minbotton > node.Y || node.Y > maxtop)
                 return true;
-            List<Ray> rays = new List<Ray>();
+            var rays = new List<Ray>();
             var newNode = new Node(node.X, maxtop);
             rays.Add(new Ray(node, newNode));
             newNode = new Node(node.X, minbotton);
@@ -266,11 +263,11 @@ namespace TestTask.Source.Components
             rays.Add(new Ray(node, newNode));
             newNode = new Node(maxright, node.Y);
             rays.Add(new Ray(node, newNode));
-            for (int j = 0; j < rays.Count; j++)
+            for (var j = 0; j < rays.Count; j++)
             {
-                int countCross = 0;
-                bool isCrossVertex = false;
-                for (int i = 0; i < bounds.Count; i++)
+                var countCross = 0;
+                var isCrossVertex = false;
+                for (var i = 0; i < bounds.Count; i++)
                 {
                     var crp = rays[j].CrossPoint(bounds[i], false);
                     if (crp != null)
@@ -295,8 +292,8 @@ namespace TestTask.Source.Components
 
         public Tuple<List<INode>, List<INode>> CalculateCrossPoints(PolygonData other)
         {
-            List<INode> newNodes1 = new List<INode>();
-            List<INode> newNodes2 = new List<INode>();
+            var newNodes1 = new List<INode>();
+            var newNodes2 = new List<INode>();
             foreach (var bound1 in bounds)
             {
                 foreach (var bound2 in other.bounds)
@@ -320,9 +317,9 @@ namespace TestTask.Source.Components
 
         public List<INode> AddCrossPoints(PolygonData other)
         {
-            List<INode> result = new List<INode>();
-            List<INode> newNodes1 = new List<INode>();
-            List<INode> newNodes2 = new List<INode>();
+            var result = new List<INode>();
+            var newNodes1 = new List<INode>();
+            var newNodes2 = new List<INode>();
             foreach (var bound1 in bounds)
             {
                 foreach (var bound2 in other.bounds)
@@ -349,8 +346,8 @@ namespace TestTask.Source.Components
 
         public INode CalculateCenterMass()
         {
-            int sumX = 0;
-            int sumY = 0;
+            var sumX = 0;
+            var sumY = 0;
             foreach (var node in nodes)
             {
                 sumX += node.X;
@@ -367,7 +364,7 @@ namespace TestTask.Source.Components
             var b = (double)n2.VectorLengthSquare(n3);
             var v1 = n2.Direction(n1);
             var v2 = n2.Direction(n3);
-            var angle = Math.Acos(v1.Item1 * v2.Item1 + v1.Item2 * v2.Item2);
+            var angle = Math.Acos(v1.x * v2.x + v1.y * v2.y);
             return Math.Sqrt(a) * Math.Sqrt(b) * Math.Sin(angle) / 2;
         }
 
@@ -412,7 +409,7 @@ namespace TestTask.Source.Components
         public double CalculateS()
         {
             PolygonData mainPolygon = null;
-            List<PolygonData> convexPolygons = new List<PolygonData>();
+            var convexPolygons = new List<PolygonData>();
             var firstNode = nodes[0];
             var minY = firstNode.Y;
             if (nodes.Count == 3)
@@ -424,7 +421,7 @@ namespace TestTask.Source.Components
             }
             mainPolygon = new PolygonData();
             var nodelist = firstNode.NodeSequentce();
-            for (int i = 0; i < nodelist.Count; i++)
+            for (var i = 0; i < nodelist.Count; i++)
                 mainPolygon.AddNode(nodelist[i].X, nodelist[i].Y);
             mainPolygon.CloseFigure();
             if (nodes.Count == 4)
@@ -439,15 +436,15 @@ namespace TestTask.Source.Components
             firstNode = mainPolygon.nodes[0];
             var currentNod = firstNode.Next().Next();
             var prevNode = firstNode;
-            List<INode> excludedPoints = new List<INode>();
-            bool connectedExcludedSeq = false;
+            var excludedPoints = new List<INode>();
+            var connectedExcludedSeq = false;
             while (true)
             {
                 if (mainPolygon.nodes.Count == 3)
                     break;
                 var middlePointX = (int)((currentNod.X - prevNode.X) / 5 + prevNode.X);
                 var middlePointY = (int)((currentNod.Y - prevNode.Y) / 5 + prevNode.Y);
-                Node middleNode = new Node(middlePointX, middlePointY);
+                var middleNode = new Node(middlePointX, middlePointY);
                 if (firstNode.Equals(currentNod.Prev()))
                     break;
                 if (mainPolygon.CheckPointOutOfPolygon(middleNode))
@@ -457,7 +454,7 @@ namespace TestTask.Source.Components
                         if (excludedPoints.Count > 0)
                         {
                             var outPolygon = new PolygonData();
-                            for (int i = 0; i < excludedPoints.Count; i++)
+                            for (var i = 0; i < excludedPoints.Count; i++)
                             {
                                 outPolygon.AddNode(excludedPoints[i].X, excludedPoints[i].Y);
                             }
@@ -485,7 +482,7 @@ namespace TestTask.Source.Components
             if (excludedPoints.Count > 0)
             {
                 var outPolygon = new PolygonData();
-                for (int i = 0; i < excludedPoints.Count; i++)
+                for (var i = 0; i < excludedPoints.Count; i++)
                 {
                     outPolygon.AddNode(excludedPoints[i].X, excludedPoints[i].Y);
                 }
@@ -493,12 +490,12 @@ namespace TestTask.Source.Components
                 convexPolygons.Add(outPolygon);
             }
 
-            double S = mainPolygon.CalculateConvexS();
+            var S = mainPolygon.CalculateConvexS();
             foreach (var polygon in convexPolygons)
             {
                 S -= polygon.CalculateConvexS();
             }
-            if (this.nodes.Count == 4 && S < 0)
+            if (nodes.Count == 4 && S < 0)
             {
                 S = -S;
             }
@@ -508,7 +505,7 @@ namespace TestTask.Source.Components
         private void OnChangeNodeCollection(object sender, EventArgs e)
         {
             GUIView.Points.Clear();
-            PointCollection points = new PointCollection();
+            var points = new PointCollection();
             foreach (var node in nodes)
             {
                 points.Add(new Point(node.X, node.Y));
@@ -522,7 +519,7 @@ namespace TestTask.Source.Components
         public void Update()
         {
             GUIView.Points.Clear();
-            PointCollection points = new PointCollection();
+            var points = new PointCollection();
             foreach (var node in nodes)
             {
                 points.Add(new Point(node.X, node.Y));

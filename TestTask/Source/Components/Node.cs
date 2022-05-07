@@ -60,12 +60,12 @@ namespace TestTask.Source.Components
             return Right.Right;
         }
 
-        public Tuple<double, double> Direction(INode other)
+        public (double, double) Direction(INode other)
         {
             var lngth = Math.Sqrt((X - other.X) * (X - other.X) + (Y - other.Y) * (Y - other.Y));
             var x = (double)(X - other.X) / lngth;
             var y = (double)(Y - other.Y) / lngth;
-            return new Tuple<double, double>(x, y);
+            return (x, y);
         }
 
         public int VectorLengthSquare(INode other)
@@ -80,15 +80,13 @@ namespace TestTask.Source.Components
 
         public bool Equals(INode other)
         {
-            if (other.X == X && other.Y == Y)
-                return true;
-            return false;
+            return other.X == X && other.Y == Y;
         }
 
         public List<INode> NodeSequentce()
         {
             var startNode = this;
-            List<INode> nodes = new List<INode>() { startNode };
+            var nodes = new List<INode>() { startNode };
             var nextNode = Next();
             if (nextNode.Next() is null)
                 return nodes;
@@ -111,11 +109,7 @@ namespace TestTask.Source.Components
         {
             if (lhs is null)
             {
-                if (rhs is null)
-                {
-                    return true;
-                }
-                return false;
+                return rhs is null;
             }
 
             return lhs.Equals(rhs);

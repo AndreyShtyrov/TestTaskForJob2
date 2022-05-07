@@ -23,7 +23,7 @@ namespace TestTask.Source.Interface
         public List<INode> NodeSequentce();
 
 
-        public Tuple<double, double> Direction(INode other);
+        public (double x, double y) Direction(INode other);
 
         public int VectorLengthSquare(INode other);
 
