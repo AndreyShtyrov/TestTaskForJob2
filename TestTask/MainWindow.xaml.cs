@@ -29,7 +29,7 @@ namespace TestTask
         public MainWindow()
         {
             InitializeComponent();
-            PolygonTreeView.DataContext = Controller.instance.PolygonDatas;
+            PolygonTreeView.DataContext = Controller.Instance.PolygonDatas;
             MouseDown += OnMouseDown;
         }
 
@@ -52,7 +52,7 @@ namespace TestTask
                 MessageBox.Show("You should choose two polygons");
                 return;
             }
-            var pointsLines = Controller.instance.CalculateCrossPoints(PolygonTreeView.selectedItems);
+            var pointsLines = Controller.Instance.CalculateCrossPoints(PolygonTreeView.selectedItems);
             var points = pointsLines.Item1;
             foreach (var point in points)
             {
@@ -101,7 +101,7 @@ namespace TestTask
                 MessageBox.Show("Both polygons should be closed");
                 return;
             }
-            var newPol = Controller.instance.CreateCrossPolygon(PolygonTreeView.selectedItems);
+            var newPol = Controller.Instance.CreateCrossPolygon(PolygonTreeView.selectedItems);
             if (newPol.Nodes.Count == 0)
                 return;
             var points = new PointCollection();
@@ -132,7 +132,7 @@ namespace TestTask
                 MessageBox.Show("Both polygons should be closed");
                 return;
             }
-            var newPol = Controller.instance.CreateUnitPolygon(PolygonTreeView.selectedItems);
+            var newPol = Controller.Instance.CreateUnitPolygon(PolygonTreeView.selectedItems);
             if (newPol.Nodes.Count == 0)
                 return;
             var points = new PointCollection();
@@ -153,7 +153,7 @@ namespace TestTask
 
         private void CalculateS1_Click(object sender, RoutedEventArgs e)
         {
-            var firstPolygon = Controller.instance.PolygonDatas[0];
+            var firstPolygon = Controller.Instance.PolygonDatas[0];
             if (firstPolygon is null || !firstPolygon.IsClosed)
                 return;
             var s = firstPolygon.CalculateS();
@@ -162,18 +162,18 @@ namespace TestTask
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var idx = Controller.instance.PolygonDatas.Count;
+            var idx = Controller.Instance.PolygonDatas.Count;
             var polygonData = new PolygonData(Controller.GenerateBush(idx));
-            Controller.instance.PolygonDatas.Add(polygonData);
+            Controller.Instance.PolygonDatas.Add(polygonData);
             Field.Children.Add(polygonData.GUIView);
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             Field.Children.Clear();
-            Controller.instance.PolygonDatas.Clear();
+            Controller.Instance.PolygonDatas.Clear();
             rectangle3 = null;
-            PolygonTreeView.DataContext = Controller.instance.PolygonDatas;
+            PolygonTreeView.DataContext = Controller.Instance.PolygonDatas;
             PolygonTreeView.selectedItems.Clear();
         }
 
@@ -191,7 +191,7 @@ namespace TestTask
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            Controller.instance.Update();
+            Controller.Instance.Update();
         }
     }
 }

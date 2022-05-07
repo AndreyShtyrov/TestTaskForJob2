@@ -229,7 +229,7 @@ namespace TestTask.Source.Components
             return false;
         }
 
-        public Tuple<List<INode>, List<INode>> CalculateCrossPoints(PolygonData other)
+        public (List<INode>, List<INode>) CalculateCrossPoints(PolygonData other)
         {
             var newNodes1 = new List<INode>();
             var newNodes2 = new List<INode>();
@@ -251,7 +251,7 @@ namespace TestTask.Source.Components
                     }
                 }
             }
-            return new Tuple<List<INode>, List<INode>>(newNodes1, newNodes2);
+            return (newNodes1, newNodes2);
         }
 
         public List<INode> AddCrossPoints(PolygonData other)
