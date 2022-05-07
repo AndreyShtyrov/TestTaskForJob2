@@ -19,9 +19,7 @@ namespace TestTask.Source
         public PolygonData SecondRectangle;
 
         public ObservableCollection<PolygonData> PolygonDatas { get; }
-        public int ChoosenRectangle => choosenRectangle;
-
-        private int choosenRectangle = 0;
+        public int ChoosenRectangle { get; } = 0;
 
         private static Controller _instance;
 
@@ -38,7 +36,7 @@ namespace TestTask.Source
             }
         }
 
-        public SolidColorBrush GenerateBush(int index)
+        public static SolidColorBrush GenerateBush(int index)
         {
             var brush = new SolidColorBrush();
             switch (index)
@@ -63,7 +61,7 @@ namespace TestTask.Source
             PolygonDatas = new ObservableCollection<PolygonData>();
         }
 
-        private bool check(List<INode> list, INode _node)
+        private static bool check(List<INode> list, INode _node)
         {
             foreach (var node in list)
             {
@@ -73,7 +71,7 @@ namespace TestTask.Source
             return false;
         }
 
-        private INode getEqualNode(List<INode> list, INode _node)
+        private static INode getEqualNode(List<INode> list, INode _node)
         {
             foreach (var node in list)
             {
@@ -95,7 +93,7 @@ namespace TestTask.Source
                 return new PolygonData();
             }
             var unitedPoints = new List<INode>();
-            foreach (var node in FirstRectangle.nodes)
+            foreach (var node in FirstRectangle.Nodes)
             {
                 var res = SecondRectangle.CheckPointOutOfPolygon(node);
 
@@ -103,7 +101,7 @@ namespace TestTask.Source
                     unitedPoints.Add(node);
 
             }
-            foreach (var node in SecondRectangle.nodes)
+            foreach (var node in SecondRectangle.Nodes)
             {
                 var res = FirstRectangle.CheckPointOutOfPolygon(node);
                 if (!res)
@@ -130,10 +128,10 @@ namespace TestTask.Source
         {
             var prevPoints = new List<INode>();
             INode prevPoint = null;
-            if (check(FirstRectangle.nodes.ToList(), unitedPoints[0]))
-                prevPoint = getEqualNode(FirstRectangle.nodes.ToList(), unitedPoints[0]);
+            if (check(FirstRectangle.Nodes.ToList(), unitedPoints[0]))
+                prevPoint = getEqualNode(FirstRectangle.Nodes.ToList(), unitedPoints[0]);
             else
-                prevPoint = getEqualNode(SecondRectangle.nodes.ToList(), unitedPoints[0]);
+                prevPoint = getEqualNode(SecondRectangle.Nodes.ToList(), unitedPoints[0]);
             prevPoints.Add(prevPoint);
             var j = 1;
             while (j < unitedPoints.Count)
@@ -143,7 +141,7 @@ namespace TestTask.Source
                 {
                     if (check(prevPoints, node))
                         continue;
-                    var _point = getEqualNode(FirstRectangle.nodes.ToList(), node);
+                    var _point = getEqualNode(FirstRectangle.Nodes.ToList(), node);
                     if (_point != null)
                     {
                         if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))
@@ -155,7 +153,7 @@ namespace TestTask.Source
                             break;
                         }
                     }
-                    _point = getEqualNode(SecondRectangle.nodes.ToList(), node);
+                    _point = getEqualNode(SecondRectangle.Nodes.ToList(), node);
                     if (_point != null)
                     {
                         if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))
@@ -186,7 +184,7 @@ namespace TestTask.Source
                 return new PolygonData();
             }
             var unitedPoints = new List<INode>();
-            foreach (var node in FirstRectangle.nodes)
+            foreach (var node in FirstRectangle.Nodes)
             {
                 var res = SecondRectangle.CheckPointOutOfPolygon(node);
 
@@ -194,7 +192,7 @@ namespace TestTask.Source
                     unitedPoints.Add(node);
 
             }
-            foreach (var node in SecondRectangle.nodes)
+            foreach (var node in SecondRectangle.Nodes)
             {
                 var res = FirstRectangle.CheckPointOutOfPolygon(node);
                 if (res)
@@ -239,7 +237,7 @@ namespace TestTask.Source
                 result.Add(node.Point);
             }
 
-            foreach (var node in FirstRectangle.nodes)
+            foreach (var node in FirstRectangle.Nodes)
             {
                 var res = SecondRectangle.CheckPointOutOfPolygon(node);
 
@@ -248,7 +246,7 @@ namespace TestTask.Source
                     result.Add(new Point(node.X, node.Y));
                 }
             }
-            foreach (var node in SecondRectangle.nodes)
+            foreach (var node in SecondRectangle.Nodes)
             {
                 var res = FirstRectangle.CheckPointOutOfPolygon(node);
                 if (!res)

@@ -7,20 +7,16 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using TestTask.Source.Interface;
 using System.ComponentModel;
+using System.Xml.Linq;
 
 
 namespace TestTask.Source.Components
 {
-    public class PolygonData: INotifyPropertyChanged
+    public class PolygonData : INotifyPropertyChanged
     {
-
-        private List<IBound> _bounds;
-        public ObservableCollection<INode> nodes
-        { get; }
-
-        public List<IBound> bounds => _bounds;
-        public SolidColorBrush Brush
-        { get; }
+        public ObservableCollection<INode> Nodes { get; }
+        public List<IBound> Bounds { get; private set; }
+        public SolidColorBrush Brush { get; }
 
         private bool isChecked = false;
 
@@ -29,90 +25,58 @@ namespace TestTask.Source.Components
             set
             {
                 isChecked = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsChecked"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsChecked)));
             }
             get => isChecked;
         }
 
         public string State => IsClosed ? "Close" : "Open";
 
-        private bool _IsClosed = false;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool IsClosed => _IsClosed;
+        public bool IsClosed { get; private set; } = false;
 
-        public Polyline GUIView
-        { get; }
+        public Polyline GUIView { get; }
 
         public void DeleteNode(INode toDelete)
         {
-            var toDeleteIdx = -1;
-
-
-            for (var i = 0; i < nodes.Count; i++)
-            {
-                if (nodes[i].Equals(toDelete))
-                {
-                    toDeleteIdx = i;
-                    break;
-                }
-            }
-            (nodes[toDeleteIdx] as Node).OnChangeNode = null;
+            var toDeleteIdx = Nodes.IndexOf(toDelete);
+            (Nodes[toDeleteIdx] as Node).OnChangeNode = null;
 
             if (toDeleteIdx < 0)
                 return;
-            var newBorder = new Border(nodes[toDeleteIdx].Prev(), nodes[toDeleteIdx].Next());
-            nodes.RemoveAt(toDeleteIdx);
+            _ = new Border(Nodes[toDeleteIdx].Prev(), Nodes[toDeleteIdx].Next());
+            Nodes.RemoveAt(toDeleteIdx);
 
-            _bounds = new List<IBound>();
-            foreach (var node in nodes)
-            {
-                _bounds.Add(node.Right);
-            }
+            Bounds = Nodes.Select(node => node.Right).ToList();
         }
 
         public void IncludeNode(INode first, INode second, INode toInclude)
         {
-            var includedBorder = -1;
-            for (var i = 0; i < bounds.Count; i++)
-            {
-                if (bounds[i].Left.Equals(first) && bounds[i].Right.Equals(second))
-                {
-                    includedBorder = i;
-                    break;
-                }
-                if (bounds[i].Right.Equals(first) && bounds[i].Left.Equals(second))
-                {
-                    includedBorder = i;
-                    break;
-                }
-            }
-            var newNode = new Node(toInclude.X, toInclude.Y);
-            var _b = new Border(bounds[includedBorder].Left, newNode);
-            _b = new Border(newNode, bounds[includedBorder].Right);
-            newNode.OnChangeNode = OnChangeNodeCollection;
-            var startNode = nodes[0];
-            var _nodes = startNode.NodeSequence();
-            nodes.Clear();
-            foreach (var node in _nodes)
-            {
-                nodes.Add(node);
-            }
+            var includedBorder = Bounds.First(bound =>
+                bound.Left.Equals(first) && bound.Right.Equals(second) ||
+                bound.Right.Equals(first) && bound.Left.Equals(second));
 
-            _bounds = new List<IBound>();
-            foreach (var node in nodes)
-            {
-                _bounds.Add(node.Right);
-            }
+            var newNode = new Node(toInclude.X, toInclude.Y);
+            _ = new Border(includedBorder.Left, newNode);
+            _ = new Border(newNode, includedBorder.Right);
+            newNode.OnChangeNode = OnChangeNodeCollection;
+            var startNode = Nodes[0];
+            var _nodes = startNode.NodeSequence();
+            Nodes.Clear();
+            foreach (var node in _nodes)
+                Nodes.Add(node);
+
+            Bounds = new List<IBound>();
+            foreach (var node in Nodes)
+                Bounds.Add(node.Right);
         }
 
         public void IncludeNodeList(List<INode> newNodes)
         {
             while (newNodes.Count > 0)
             {
-                var atSameBound = new List<INode>();
-                atSameBound.Add(newNodes[0]);
+                var atSameBound = new List<INode> { newNodes[0] };
                 for (var i = 1; i < newNodes.Count; i++)
                 {
                     if (atSameBound[0].Prev().Equals(newNodes[i].Prev())
@@ -137,72 +101,70 @@ namespace TestTask.Source.Components
         public PolygonData(SolidColorBrush brush)
         {
             Brush = brush;
-            nodes = new ObservableCollection<INode>();
-            _bounds = new List<IBound>();
-            GUIView = new Polyline();
-            GUIView.StrokeThickness = 2;
-            GUIView.Stroke = Brush;
-            nodes.CollectionChanged += OnChangeNodeCollection;
+            Nodes = new ObservableCollection<INode>();
+            Bounds = new List<IBound>();
+            GUIView = new Polyline
+            {
+                StrokeThickness = 2,
+                Stroke = Brush
+            };
+            Nodes.CollectionChanged += OnChangeNodeCollection;
         }
 
         public PolygonData()
         {
             Brush = new SolidColorBrush(Colors.Black);
-            nodes = new ObservableCollection<INode>();
-            _bounds = new List<IBound>();
-            GUIView = new Polyline();
-            GUIView.StrokeThickness = 2;
-            GUIView.Stroke = Brush;
+            Nodes = new ObservableCollection<INode>();
+            Bounds = new List<IBound>();
+            GUIView = new Polyline
+            {
+                StrokeThickness = 2,
+                Stroke = Brush
+            };
         }
 
         public void AddNode(int X, int Y)
         {
-            if (_IsClosed is true)
+            if (IsClosed)
                 return;
-            if (nodes.Count > 2)
+            if (Nodes.Count > 2)
             {
-                if (Math.Abs(Y - nodes[0].Y) < 5 && Math.Abs(X - nodes[0].X) < 5)
+                if (Math.Abs(Y - Nodes[0].Y) < 5 && Math.Abs(X - Nodes[0].X) < 5)
                 {
                     CloseFigure();
                     return;
                 }
             }
-            var newNode = new Node(X, Y);
-            newNode.OnChangeNode = OnChangeNodeCollection;
-            if (nodes.Count == 0)
+            var newNode = new Node(X, Y)
             {
-                nodes.Add(newNode);
+                OnChangeNode = OnChangeNodeCollection
+            };
+            if (Nodes.Count == 0)
+            {
+                Nodes.Add(newNode);
                 return;
             }
-            var prevNode = nodes[nodes.Count - 1];
+            var prevNode = Nodes[^1];
             var newBound = new Border(prevNode, newNode);
-            nodes.Add(newNode);
-            bounds.Add(newBound);
+            Nodes.Add(newNode);
+            Bounds.Add(newBound);
         }
 
         public bool CheckNewBoundCrossPrevBorders(int X, int Y)
         {
-            if (nodes.Count == 0 || bounds.Count == 0)
+            if (Nodes.Count == 0 || Bounds.Count == 0)
                 return false;
-            var prevNode = new Node(nodes[nodes.Count - 1].X, nodes[nodes.Count - 1].Y);
+            var prevNode = new Node(Nodes[^1].X, Nodes[^1].Y);
             var nextNode = new Node(X, Y);
             var ray = new Ray(prevNode, nextNode);
-            for(var i = 0; i < bounds.Count - 1; i++)
-            {
-                var crp = ray.CrossPoint(bounds[i]);
-                if (crp.HasValue)
-                    return true;
-            }
-            return false;
+            return Bounds.Any(bound => ray.CrossPoint(bound).HasValue);
         }
 
         public PolygonData Copy()
         {
             var pol = new PolygonData();
-            foreach (var node in nodes)
-            {
+            foreach (var node in Nodes)
                 pol.AddNode(node.X, node.Y);
-            }
             if (IsClosed)
                 pol.CloseFigure();
             return pol;
@@ -210,71 +172,59 @@ namespace TestTask.Source.Components
 
         public void CloseFigure()
         {
-            if (_IsClosed is true)
+            if (IsClosed || Nodes.Count < 3)
                 return;
-            if (nodes.Count < 3)
-                return;
-            _IsClosed = true;
-            var newBound = new Border(nodes[nodes.Count - 1], nodes[0]);
-            bounds.Add(newBound);
-            OnChangeNodeCollection(new object(), new EventArgs());
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("State"));
+            IsClosed = true;
+            var newBound = new Border(Nodes[^1], Nodes[0]);
+            Bounds.Add(newBound);
+            OnChangeNodeCollection(this, new EventArgs());
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(State)));
         }
 
         public bool CheckPointOutOfPolygon(INode node)
         {
-            var minleft = nodes[0].X;
-            var maxright = nodes[0].X;
-            var maxtop = nodes[0].Y;
-            var minbotton = nodes[0].Y;
+            var minleft = Nodes[0].X;
+            var maxright = Nodes[0].X;
+            var maxtop = Nodes[0].Y;
+            var minbotton = Nodes[0].Y;
 
-            for (var i = 1; i < nodes.Count; i++)
+            for (var i = 1; i < Nodes.Count; i++)
             {
-                if (nodes[i].X < minleft)
-                    minleft = nodes[i].X;
-                if (nodes[i].X > maxright)
-                    maxright = nodes[i].X;
-                if (nodes[i].Y < minbotton)
-                    minbotton = nodes[i].Y;
-                if (nodes[i].Y > maxtop)
-                    maxtop = nodes[i].Y;
+                if (Nodes[i].X < minleft)
+                    minleft = Nodes[i].X;
+                if (Nodes[i].X > maxright)
+                    maxright = Nodes[i].X;
+                if (Nodes[i].Y < minbotton)
+                    minbotton = Nodes[i].Y;
+                if (Nodes[i].Y > maxtop)
+                    maxtop = Nodes[i].Y;
             }
-            if (minleft > node.X || node.X > maxright)
+            if (minleft > node.X || node.X > maxright || minbotton > node.Y || node.Y > maxtop)
                 return true;
-            if (minbotton > node.Y || node.Y > maxtop)
-                return true;
-            var rays = new List<Ray>();
-            var newNode = new Node(node.X, maxtop);
-            rays.Add(new Ray(node, newNode));
-            newNode = new Node(node.X, minbotton);
-            rays.Add(new Ray(node, newNode));
-            newNode = new Node(minleft, node.Y);
-            rays.Add(new Ray(node, newNode));
-            newNode = new Node(maxright, node.Y);
-            rays.Add(new Ray(node, newNode));
-            for (var j = 0; j < rays.Count; j++)
+            var rays = new List<Ray>
+            {
+                new Ray(node, new Node(node.X, maxtop)),
+                new Ray(node, new Node(node.X, minbotton)),
+                new Ray(node, new Node(minleft, node.Y)),
+                new Ray(node, new Node(maxright, node.Y))
+            };
+            foreach (var ray in rays)
             {
                 var countCross = 0;
                 var isCrossVertex = false;
-                for (var i = 0; i < bounds.Count; i++)
+                foreach (var bound in Bounds)
                 {
-                    var crp = rays[j].CrossPoint(bounds[i], false);
+                    var crp = ray.CrossPoint(bound, false);
                     if (crp != null)
                     {
-                        var crossedVertex = getEqualNode(nodes.ToList(), new Node((int)crp.Value.X, (int)crp.Value.Y));
-                        if (crossedVertex != null)
+                        if (Nodes.Any(node => node.X == (int)crp.Value.X && node.Y == (int)crp.Value.Y))
                             isCrossVertex = true;
                         countCross += 1;
                     }
                 }
                 if (isCrossVertex)
                     continue;
-                if (countCross == 0)
-                    return true;
-                if (countCross % 2 == 0)
-                    return true;
-                if (countCross % 2 == 1)
-                    return false;
+                return countCross % 2 == 0;
             }
             return false;
         }
@@ -283,9 +233,9 @@ namespace TestTask.Source.Components
         {
             var newNodes1 = new List<INode>();
             var newNodes2 = new List<INode>();
-            foreach (var bound1 in bounds)
+            foreach (var bound1 in Bounds)
             {
-                foreach (var bound2 in other.bounds)
+                foreach (var bound2 in other.Bounds)
                 {
                     var point = bound1.CrossPoint(bound2);
                     if (point != null)
@@ -309,9 +259,9 @@ namespace TestTask.Source.Components
             var result = new List<INode>();
             var newNodes1 = new List<INode>();
             var newNodes2 = new List<INode>();
-            foreach (var bound1 in bounds)
+            foreach (var bound1 in Bounds)
             {
-                foreach (var bound2 in other.bounds)
+                foreach (var bound2 in other.Bounds)
                 {
                     var point = bound1.CrossPoint(bound2);
                     if (point != null)
@@ -337,17 +287,17 @@ namespace TestTask.Source.Components
         {
             var sumX = 0;
             var sumY = 0;
-            foreach (var node in nodes)
+            foreach (var node in Nodes)
             {
                 sumX += node.X;
                 sumY += node.Y;
             }
-            var x = (int)Math.Round(sumX / (double)nodes.Count);
-            var y = (int)Math.Round(sumY / (double)nodes.Count);
+            var x = (int)Math.Round(sumX / (double)Nodes.Count);
+            var y = (int)Math.Round(sumY / (double)Nodes.Count);
             return new Node(x, y);
         }
 
-        public double TriangleSquare(INode n1, INode n2, INode n3)
+        public static double TriangleSquare(INode n1, INode n2, INode n3)
         {
             var a = (double)n1.VectorLengthSquare(n2);
             var b = (double)n2.VectorLengthSquare(n3);
@@ -360,81 +310,54 @@ namespace TestTask.Source.Components
         public double CalculateConvexS()
         {
             var centerMass = CalculateCenterMass();
-            var firstNode = nodes[0];
+            var firstNode = Nodes[0];
             var currentNode = firstNode.Next();
             var prevNode = firstNode;
             double S = 0;
-            while (true)
+            do
             {
                 S += TriangleSquare(currentNode, centerMass, prevNode);
                 prevNode = currentNode;
                 currentNode = currentNode.Next();
-                if (prevNode.Equals(firstNode))
-                    break;
-            }
+            } while (!prevNode.Equals(firstNode));
             return S;
-        }
-
-        private bool check(List<INode> list, INode _node)
-        {
-            foreach (var node in list)
-            {
-                if (node.Equals(_node))
-                    return true;
-            }
-            return false;
-        }
-
-        private INode getEqualNode(List<INode> list, INode _node)
-        {
-            foreach (var node in list)
-            {
-                if (node.Equals(_node))
-                    return node;
-            }
-            return null;
         }
 
         public double CalculateS()
         {
-            PolygonData mainPolygon = null;
             var convexPolygons = new List<PolygonData>();
-            var firstNode = nodes[0];
+            var firstNode = Nodes[0];
             var minY = firstNode.Y;
-            if (nodes.Count == 3)
-                return TriangleSquare(nodes[0], nodes[1], nodes[2]);
-            foreach (var node in nodes)
+            if (Nodes.Count == 3)
+                return TriangleSquare(Nodes[0], Nodes[1], Nodes[2]);
+            foreach (var node in Nodes)
             {
                 if (node.Y < minY)
                     firstNode = node;
             }
-            mainPolygon = new PolygonData();
+            var mainPolygon = new PolygonData();
             var nodelist = firstNode.NodeSequence();
             for (var i = 0; i < nodelist.Count; i++)
                 mainPolygon.AddNode(nodelist[i].X, nodelist[i].Y);
             mainPolygon.CloseFigure();
-            if (nodes.Count == 4)
+            if (Nodes.Count == 4 && (Nodes[0].X == Nodes[2].X) && (Nodes[1].Y == Nodes[3].Y))
             {
-                if ((nodes[0].X == nodes[2].X) && (nodes[1].Y == nodes[3].Y))
-                {
-                    return mainPolygon.CalculateConvexS();
-                }
+                return mainPolygon.CalculateConvexS();
             }
 
-
-            firstNode = mainPolygon.nodes[0];
-            var currentNod = firstNode.Next().Next();
+            firstNode = mainPolygon.Nodes[0];
+            var currentNode = firstNode.Next().Next();
             var prevNode = firstNode;
             var excludedPoints = new List<INode>();
             var connectedExcludedSeq = false;
             while (true)
             {
-                if (mainPolygon.nodes.Count == 3)
+                if (mainPolygon.Nodes.Count == 3)
                     break;
-                var middlePointX = (currentNod.X - prevNode.X) / 5 + prevNode.X;
-                var middlePointY = (currentNod.Y - prevNode.Y) / 5 + prevNode.Y;
+                var middlePointX = (currentNode.X - prevNode.X) / 5 + prevNode.X;
+                var middlePointY = (currentNode.Y - prevNode.Y) / 5 + prevNode.Y;
                 var middleNode = new Node(middlePointX, middlePointY);
-                if (firstNode.Equals(currentNod.Prev()))
+                if (firstNode.Equals(currentNode.Prev()))
                     break;
                 if (mainPolygon.CheckPointOutOfPolygon(middleNode))
                 {
@@ -452,70 +375,43 @@ namespace TestTask.Source.Components
                         }
                         excludedPoints = new List<INode>();
                         connectedExcludedSeq = true;
-                    }
-                    if (!check(excludedPoints, prevNode))
-                        excludedPoints.Add(prevNode);
-                    if (!check(excludedPoints, currentNod.Prev()))
-                        excludedPoints.Add(currentNod.Prev());
-                    if (!check(excludedPoints, currentNod))
-                        excludedPoints.Add(currentNod);
-                    mainPolygon.DeleteNode(currentNod.Prev());
-                    currentNod = currentNod.Next();
+}
+                    excludedPoints.AddRange(new[] { prevNode, currentNode.Prev(), currentNode }
+                        .Where(node => !excludedPoints.Contains(node)));
+                    mainPolygon.DeleteNode(currentNode.Prev());
+                    currentNode = currentNode.Next();
                     continue;
                 }
                 connectedExcludedSeq = false;
                 prevNode = prevNode.Next();
-                currentNod = currentNod.Next();
+                currentNode = currentNode.Next();
             }
 
             if (excludedPoints.Count > 0)
             {
                 var outPolygon = new PolygonData();
                 for (var i = 0; i < excludedPoints.Count; i++)
-                {
                     outPolygon.AddNode(excludedPoints[i].X, excludedPoints[i].Y);
-                }
                 outPolygon.CloseFigure();
                 convexPolygons.Add(outPolygon);
             }
 
-            var S = mainPolygon.CalculateConvexS();
-            foreach (var polygon in convexPolygons)
-            {
-                S -= polygon.CalculateConvexS();
-            }
-            if (nodes.Count == 4 && S < 0)
-            {
+            var S = mainPolygon.CalculateConvexS() - convexPolygons.Sum(polygon => polygon.CalculateConvexS());
+            if (Nodes.Count == 4 && S < 0)
                 S = -S;
-            }
             return S;
         }
 
-        private void OnChangeNodeCollection(object sender, EventArgs e)
-        {
-            GUIView.Points.Clear();
-            var points = new PointCollection();
-            foreach (var node in nodes)
-            {
-                points.Add(new Point(node.X, node.Y));
-
-            }
-            if (IsClosed)
-                points.Add(new Point(nodes[0].X, nodes[0].Y));
-            GUIView.Points = points;
-        }
+        private void OnChangeNodeCollection(object sender, EventArgs e) => Update();
 
         public void Update()
         {
             GUIView.Points.Clear();
             var points = new PointCollection();
-            foreach (var node in nodes)
-            {
+            foreach (var node in Nodes)
                 points.Add(new Point(node.X, node.Y));
-
-            }
             if (IsClosed)
-                points.Add(new Point(nodes[0].X, nodes[0].Y));
+                points.Add(new Point(Nodes[0].X, Nodes[0].Y));
             GUIView.Points = points;
         }
     }
