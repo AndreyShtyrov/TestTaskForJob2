@@ -153,7 +153,12 @@ namespace TestTask
 
         private void CalculateS1_Click(object sender, RoutedEventArgs e)
         {
-            var firstPolygon = Controller.Instance.PolygonDatas[0];
+            if (PolygonTreeView.selectedItems.Count != 1)
+            {
+                MessageBox.Show("You should choose one polygon");
+                return;
+            }
+            var firstPolygon = PolygonTreeView.selectedItems[0] as PolygonData;
             if (firstPolygon is null || !firstPolygon.IsClosed)
                 return;
             var s = firstPolygon.CalculateS();
