@@ -91,20 +91,20 @@ namespace TestTask.Source.Components
             int includedBorder = -1;
             for (int i = 0; i < bounds.Count; i++)
             {
-                if (bounds[i].left.Equals(first) && bounds[i].right.Equals(second))
+                if (bounds[i].Left.Equals(first) && bounds[i].Right.Equals(second))
                 {
                     includedBorder = i;
                     break;
                 }
-                if (bounds[i].right.Equals(first) && bounds[i].left.Equals(second))
+                if (bounds[i].Right.Equals(first) && bounds[i].Left.Equals(second))
                 {
                     includedBorder = i;
                     break;
                 }
             }
             Node newNode = new Node(toInclude.X, toInclude.Y);
-            var _b = new Border(bounds[includedBorder].left, newNode);
-            _b = new Border(newNode, bounds[includedBorder].right);
+            var _b = new Border(bounds[includedBorder].Left, newNode);
+            _b = new Border(newNode, bounds[includedBorder].Right);
             newNode.OnChangeNode = OnChangeNodeCollection;
             var startNode = nodes[0];
             var _nodes = startNode.NodeSequentce();
@@ -134,7 +134,7 @@ namespace TestTask.Source.Components
                         atSameBound.Add(newNodes[i]);
                 }
                 var left = atSameBound[0].Prev();
-                atSameBound = atSameBound.OrderBy(x => left.VectorLengthSquare(x)).ToList<INode>();
+                atSameBound = atSameBound.OrderBy(x => left.VectorLengthSquare(x)).ToList();
                 var right = atSameBound[0].Next();
                 foreach (var node in atSameBound)
                 {
@@ -275,7 +275,7 @@ namespace TestTask.Source.Components
                     var crp = rays[j].CrossPoint(bounds[i], false);
                     if (crp != null)
                     {
-                        var crossedVertex = getEqualNode(nodes.ToList<INode>(), new Node((int)crp.Value.X, (int)crp.Value.Y));
+                        var crossedVertex = getEqualNode(nodes.ToList(), new Node((int)crp.Value.X, (int)crp.Value.Y));
                         if (crossedVertex != null)
                             isCrossVertex = true;
                         countCross += 1;
@@ -305,12 +305,12 @@ namespace TestTask.Source.Components
                     if (point != null)
                     {
                         var node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.Left = new Segment(bound1.left, node);
-                        node.Right = new Segment(node, bound1.right);
+                        node.Left = new Segment(bound1.Left, node);
+                        node.Right = new Segment(node, bound1.Right);
                         newNodes1.Add(node);
                         node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.Left = new Segment(bound2.left, node);
-                        node.Right = new Segment(node, bound2.right);
+                        node.Left = new Segment(bound2.Left, node);
+                        node.Right = new Segment(node, bound2.Right);
                         newNodes2.Add(node);
                     }
                 }
@@ -332,12 +332,12 @@ namespace TestTask.Source.Components
                     {
                         var node = new Node((int)point.Value.X, (int)point.Value.Y);
                         result.Add(node);
-                        node.Left = new Segment(bound1.left, node);
-                        node.Right = new Segment(node, bound1.right);
+                        node.Left = new Segment(bound1.Left, node);
+                        node.Right = new Segment(node, bound1.Right);
                         newNodes1.Add(node);
                         node = new Node((int)point.Value.X, (int)point.Value.Y);
-                        node.Left = new Segment(bound2.left, node);
-                        node.Right = new Segment(node, bound2.right);
+                        node.Left = new Segment(bound2.Left, node);
+                        node.Right = new Segment(node, bound2.Right);
                         newNodes2.Add(node);
                     }
                 }

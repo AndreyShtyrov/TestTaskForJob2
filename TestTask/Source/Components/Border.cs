@@ -12,56 +12,56 @@ namespace TestTask.Source.Components
 {
     public class Segment : IBound
     {
-        public INode left { get ; }
-        public INode right { get ; }
+        public INode Left { get ; }
+        public INode Right { get ; }
 
         public Segment(INode left, INode right)
         {
-            this.left = left;
-            this.right = right;
+            this.Left = left;
+            this.Right = right;
         }
 
         public double CalculateAngle(INode other, bool isForward)
         {
             if (isForward)
             {
-                var dir1 = right.Direction(left);
-                var dir2 = other.Direction(right);
+                var dir1 = Right.Direction(Left);
+                var dir2 = other.Direction(Right);
                 return Math.Acos(dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2);
             }
-            var dir_1 = left.Direction(right);
-            var dir_2 = other.Direction(left);
+            var dir_1 = Left.Direction(Right);
+            var dir_2 = other.Direction(Left);
             return Math.Acos(dir_1.Item1 * dir_2.Item1 + dir_1.Item2 * dir_2.Item2);
         }
 
-        public virtual Nullable<Point> CrossPoint(IBound other, bool islimited = true)
+        public virtual Point? CrossPoint(IBound other, bool islimited = true)
         {
             if (islimited)
             {
-                if (Math.Max(left.Y, right.Y) < Math.Min(other.left.Y, other.right.Y))
+                if (Math.Max(Left.Y, Right.Y) < Math.Min(other.Left.Y, other.Right.Y))
                     return null;
-                if (Math.Min(left.Y, right.Y) > Math.Max(other.left.Y, other.right.Y))
+                if (Math.Min(Left.Y, Right.Y) > Math.Max(other.Left.Y, other.Right.Y))
                     return null;
-                if (Math.Max(left.X, right.X) < Math.Min(other.left.X, other.right.X))
+                if (Math.Max(Left.X, Right.X) < Math.Min(other.Left.X, other.Right.X))
                     return null;
-                if (Math.Min(left.X, right.X) > Math.Max(other.left.X, other.right.X))
+                if (Math.Min(Left.X, Right.X) > Math.Max(other.Left.X, other.Right.X))
                     return null;
             }
-            var c11 = right.X - left.X;
-            var c21 = right.Y - left.Y;
-            var c12 = -(other.right.X - other.left.X);
-            var c22 = -(other.right.Y - other.left.Y);
-            var t1 = other.left.X - left.X;
-            var t2 = other.left.Y - left.Y;
-            Matrix<Double> A = DenseMatrix.OfArray(new double[,] { { c11, c12 }, { c21, c22 } });
-            Vector<Double> B = Vector<Double>.Build.Dense(new double[] { t1, t2 });
+            var c11 = Right.X - Left.X;
+            var c21 = Right.Y - Left.Y;
+            var c12 = -(other.Right.X - other.Left.X);
+            var c22 = -(other.Right.Y - other.Left.Y);
+            var t1 = other.Left.X - Left.X;
+            var t2 = other.Left.Y - Left.Y;
+            Matrix<double> A = DenseMatrix.OfArray(new double[,] { { c11, c12 }, { c21, c22 } });
+            Vector<double> B = Vector<double>.Build.Dense(new double[] { t1, t2 });
             var linearRoots = A.Solve(B);
             var a = (double)linearRoots[0];
             if (double.IsInfinity(a))
                 return null;
 
-            var y = Math.Round(a * c21 + left.Y);
-            var x = Math.Round(a * c11 + left.X);
+            var y = Math.Round(a * c21 + Left.Y);
+            var x = Math.Round(a * c11 + Left.X);
             if (islimited)
             {
                 if (!InBorders((int)x, (int)y))
@@ -74,9 +74,9 @@ namespace TestTask.Source.Components
 
         public virtual bool InBorders(int X, int Y)
         {
-            if (Math.Min(left.X, right.X) > X || X > Math.Max(left.X, right.X))
+            if (Math.Min(Left.X, Right.X) > X || X > Math.Max(Left.X, Right.X))
                 return false;
-            if (Math.Min(left.Y, right.Y) > Y || Y > Math.Max(left.Y, right.Y))
+            if (Math.Min(Left.Y, Right.Y) > Y || Y > Math.Max(Left.Y, Right.Y))
                 return false;
             return true;
             //if ((left.X < right.X) && (left.X <= X || X < right.X))
@@ -92,28 +92,28 @@ namespace TestTask.Source.Components
 
         public bool Equals(IBound other)
         {
-            if (left != null && right != null)
+            if (Left != null && Right != null)
             {
-                if (other.left != null && other.right != null)
+                if (other.Left != null && other.Right != null)
                 {
-                    if (other.left.Equals(left) && other.right.Equals(right))
+                    if (other.Left.Equals(Left) && other.Right.Equals(Right))
                         return true;
                 }
                 return false;
             }
-            if (left != null && other.left != null)
+            if (Left != null && other.Left != null)
             {
-                if (other.right != null)
+                if (other.Right != null)
                     return false;
-                if (left.Equals(other.left))
+                if (Left.Equals(other.Left))
                     return true;
                 return false;
             }
-            if (right != null && other.right != null)
+            if (Right != null && other.Right != null)
             {
-                if (other.left != null)
+                if (other.Left != null)
                     return false;
-                if (right.Equals(other.right))
+                if (Right.Equals(other.Right))
                     return true;
                 return false;
             }
@@ -146,8 +146,8 @@ namespace TestTask.Source.Components
 
             if (node == null)
                 return null;
-            var dir1 = left.Direction(right);
-            var dir2 = left.Direction(new Node((int)node.Value.X, (int)node.Value.Y));
+            var dir1 = Left.Direction(Right);
+            var dir2 = Left.Direction(new Node((int)node.Value.X, (int)node.Value.Y));
             var scalar = dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2;
             if (scalar > 0)
                 return node;
@@ -157,8 +157,8 @@ namespace TestTask.Source.Components
 
         public override bool InBorders(int X, int Y)
         {
-            var dir1 = left.Direction(right);
-            var dir2 = left.Direction(new Node(X, Y));
+            var dir1 = Left.Direction(Right);
+            var dir2 = Left.Direction(new Node(X, Y));
             var scalar = dir1.Item1 * dir2.Item1 + dir1.Item2 * dir2.Item2;
             if (scalar > 0)
                 return true;

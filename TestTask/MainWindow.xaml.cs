@@ -83,13 +83,13 @@ namespace TestTask
             }
             foreach (var bound in pointsLines.Item2)
             {
-                var p1 = new Point(bound.left.X, bound.left.Y);
-                var p2 = new Point(bound.right.X, bound.right.Y);
+                var p1 = new Point(bound.Left.X, bound.Left.Y);
+                var p2 = new Point(bound.Right.X, bound.Right.Y);
                 Line line = new Line();
-                line.X1 = bound.left.X;
-                line.X2 = bound.right.X;
-                line.Y1 = bound.left.Y;
-                line.Y2 = bound.right.Y;
+                line.X1 = bound.Left.X;
+                line.X2 = bound.Right.X;
+                line.Y1 = bound.Left.Y;
+                line.Y2 = bound.Right.Y;
                 line.Stroke = yBrush;
                 Field.Children.Add(line);
 
@@ -99,8 +99,8 @@ namespace TestTask
             {
                 var bound = pointsLines.Item2[i];
                 Label label = new Label();
-                Canvas.SetLeft(label, bound.left.X + 8);
-                Canvas.SetTop(label, bound.left.Y);
+                Canvas.SetLeft(label, bound.Left.X + 8);
+                Canvas.SetTop(label, bound.Left.Y);
                 label.Content = pointsLines.Item3[i].ToString();
                 Field.Children.Add(label);
             }

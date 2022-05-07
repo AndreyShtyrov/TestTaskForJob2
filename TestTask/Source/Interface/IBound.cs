@@ -7,21 +7,15 @@ using System.Threading.Tasks;
 
 namespace TestTask.Source.Interface
 {
-    public interface IBound
+    public interface IBound : IEquatable<IBound>
     {
-        public INode left
-        { get; }
+        public INode Left { get; }
+        public INode Right { get; }
 
-        public INode right
-        { get; }
-
-
-        public Nullable<Point> CrossPoint(IBound other, Boolean islimited = true);
+        public Point? CrossPoint(IBound other, bool islimited = true);
 
         public double CalculateAngle(INode other, bool isForward=true);
 
         public bool InBorders(int X, int Y);
-
-        public bool Equals(IBound other);
     }
 }

@@ -131,10 +131,10 @@ namespace TestTask.Source
         {
             var prevPoints = new List<INode>();
             INode prevPoint = null;
-            if (check(FirstRectangle.nodes.ToList<INode>(), unitedPoints[0]))
-                prevPoint = getEqualNode(FirstRectangle.nodes.ToList<INode>(), unitedPoints[0]);
+            if (check(FirstRectangle.nodes.ToList(), unitedPoints[0]))
+                prevPoint = getEqualNode(FirstRectangle.nodes.ToList(), unitedPoints[0]);
             else
-                prevPoint = getEqualNode(SecondRectangle.nodes.ToList<INode>(), unitedPoints[0]);
+                prevPoint = getEqualNode(SecondRectangle.nodes.ToList(), unitedPoints[0]);
             prevPoints.Add(prevPoint);
             int j = 1;
             while (j < unitedPoints.Count)
@@ -144,7 +144,7 @@ namespace TestTask.Source
                 {
                     if (check(prevPoints, node))
                         continue;
-                    var _point = getEqualNode(FirstRectangle.nodes.ToList<INode>(), node);
+                    var _point = getEqualNode(FirstRectangle.nodes.ToList(), node);
                     if (_point != null)
                     {
                         if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))
@@ -156,7 +156,7 @@ namespace TestTask.Source
                             break;
                         }
                     }
-                    _point = getEqualNode(SecondRectangle.nodes.ToList<INode>(), node);
+                    _point = getEqualNode(SecondRectangle.nodes.ToList(), node);
                     if (_point != null)
                     {
                         if (_point.Prev().Equals(prevPoint) || _point.Next().Equals(prevPoint))

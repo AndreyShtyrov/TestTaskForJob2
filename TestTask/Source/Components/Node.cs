@@ -57,7 +57,7 @@ namespace TestTask.Source.Components
 
         public INode Next()
         {
-            return Right.right;
+            return Right.Right;
         }
 
         public Tuple<double, double> Direction(INode other)
@@ -75,7 +75,7 @@ namespace TestTask.Source.Components
 
         public INode Prev()
         {
-            return Left.left;
+            return Left.Left;
         }
 
         public bool Equals(INode other)
