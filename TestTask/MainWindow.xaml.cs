@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -119,6 +119,11 @@ namespace TestTask
                 MessageBox.Show("You Should choose two polgydon");
                 return;
             }
+            if (!PolygonTreeView.selectedItems[0].IsClosed && !PolygonTreeView.selectedItems[1].IsClosed)
+            {
+                MessageBox.Show("Both polygons should be closed");
+                return;
+            }
             var newPol = Controller.instance.CreateCrossPolygon(PolygonTreeView.selectedItems);
             if (newPol.nodes.Count == 0)
                 return;
@@ -144,6 +149,11 @@ namespace TestTask
             if (PolygonTreeView.selectedItems.Count != 2)
             {
                 MessageBox.Show("You Should choose two polgydon");
+                return;
+            }
+            if (!PolygonTreeView.selectedItems[0].IsClosed && !PolygonTreeView.selectedItems[1].IsClosed)
+            {
+                MessageBox.Show("Both polygons should be closed");
                 return;
             }
             var newPol = Controller.instance.CreateUnitPolygon(PolygonTreeView.selectedItems);

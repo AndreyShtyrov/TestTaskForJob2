@@ -12,10 +12,10 @@
                                   ItemsSource="{Binding nodes}">
             <Grid>
                 <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding IsChecked}" Click="RadioButton_Click" VerticalAlignment="Center"/>
                     <Label Content="Polygon "/>
                     <Separator/>
                     <Label Content="{Binding State}" />
-                    <CheckBox IsChecked="{Binding IsChecked}" Click="RadioButton_Click" VerticalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </HierarchicalDataTemplate>
