@@ -18,8 +18,7 @@ namespace TestTask.Source.Components
         public ObservableCollection<INode> nodes
         { get; }
 
-        public List<IBound> bounds
-        { get { return _bounds; } }
+        public List<IBound> bounds => _bounds;
         public SolidColorBrush Brush
         { get; }
 
@@ -32,26 +31,16 @@ namespace TestTask.Source.Components
                 isChecked = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsChecked"));
             }
-            get
-            {
-                return isChecked;
-            }
+            get => isChecked;
         }
 
-        public string State
-        {
-            get
-            {
-                return IsClosed ? "Close" : "Open";
-            }
-        }
+        public string State => IsClosed ? "Close" : "Open";
 
         private bool _IsClosed = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool IsClosed
-        { get { return _IsClosed; } }
+        public bool IsClosed => _IsClosed;
 
         public Polyline GUIView
         { get; }
@@ -104,7 +93,7 @@ namespace TestTask.Source.Components
             _b = new Border(newNode, bounds[includedBorder].Right);
             newNode.OnChangeNode = OnChangeNodeCollection;
             var startNode = nodes[0];
-            var _nodes = startNode.NodeSequentce();
+            var _nodes = startNode.NodeSequence();
             nodes.Clear();
             foreach (var node in _nodes)
             {
@@ -353,8 +342,8 @@ namespace TestTask.Source.Components
                 sumX += node.X;
                 sumY += node.Y;
             }
-            var x = (int)Math.Round(((double)sumX) / (double)nodes.Count);
-            var y = (int)Math.Round(((double)sumY) / (double)nodes.Count);
+            var x = (int)Math.Round(sumX / (double)nodes.Count);
+            var y = (int)Math.Round(sumY / (double)nodes.Count);
             return new Node(x, y);
         }
 
@@ -420,7 +409,7 @@ namespace TestTask.Source.Components
                     firstNode = node;
             }
             mainPolygon = new PolygonData();
-            var nodelist = firstNode.NodeSequentce();
+            var nodelist = firstNode.NodeSequence();
             for (var i = 0; i < nodelist.Count; i++)
                 mainPolygon.AddNode(nodelist[i].X, nodelist[i].Y);
             mainPolygon.CloseFigure();
@@ -442,8 +431,8 @@ namespace TestTask.Source.Components
             {
                 if (mainPolygon.nodes.Count == 3)
                     break;
-                var middlePointX = (int)((currentNod.X - prevNode.X) / 5 + prevNode.X);
-                var middlePointY = (int)((currentNod.Y - prevNode.Y) / 5 + prevNode.Y);
+                var middlePointX = (currentNod.X - prevNode.X) / 5 + prevNode.X;
+                var middlePointY = (currentNod.Y - prevNode.Y) / 5 + prevNode.Y;
                 var middleNode = new Node(middlePointX, middlePointY);
                 if (firstNode.Equals(currentNod.Prev()))
                     break;

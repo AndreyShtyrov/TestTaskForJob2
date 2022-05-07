@@ -19,8 +19,7 @@ namespace TestTask.Source
         public PolygonData SecondRectangle;
 
         public ObservableCollection<PolygonData> PolygonDatas { get; }
-        public int ChoosenRectangle
-        { get { return choosenRectangle; } }
+        public int ChoosenRectangle => choosenRectangle;
 
         private int choosenRectangle = 0;
 

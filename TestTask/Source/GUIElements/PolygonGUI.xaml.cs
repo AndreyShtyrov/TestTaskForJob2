@@ -22,7 +22,7 @@ namespace TestTask.Source.GUIElements
     public partial class PolygonGUI : UserControl
     {
 
-        public List<PolygonData> selectedItems = new List<PolygonData>();
+        public List<PolygonData> selectedItems = new();
 
         public PolygonGUI()
         {

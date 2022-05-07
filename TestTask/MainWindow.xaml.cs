@@ -25,7 +25,7 @@ namespace TestTask
     {
         private Polyline rectangle3;
         
-        private List<Ellipse> ellipses = new List<Ellipse>();
+        private List<Ellipse> ellipses = new();
         public MainWindow()
         {
             InitializeComponent();

@@ -20,7 +20,7 @@ namespace TestTask.Source.Interface
         public INode Prev();
         public INode Next();
 
-        public List<INode> NodeSequentce();
+        public List<INode> NodeSequence();
 
 
         public (double x, double y) Direction(INode other);
